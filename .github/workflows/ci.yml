@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Typecheck, lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.x
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Generate Worker types
+        run: bun run cf-typegen
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Test
+        run: bun run test
+
+      - name: Check deploy config
+        run: bun run check:deploy
+
+      - name: Build the Worker
+        run: bun run build:worker
+
+      - name: No em or en dashes
+        run: bun run check:copy

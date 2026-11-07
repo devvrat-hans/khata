@@ -1,0 +1,80 @@
+// Cloudflare Workers configuration for Khata (Next.js through the OpenNext adapter).
+//
+// Build and deploy:  bun run deploy
+// Local preview:     bun run preview   (runs the built Worker in workerd)
+// Secrets:           bunx wrangler secret put <NAME>   (never commit secrets here)
+//
+// Docs: https://opennext.js.org/cloudflare
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "khata",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // Wrangler wraps named functions in `__name()` by default. Inline scripts that
+  // are serialised with Function.prototype.toString then fail in the browser.
+  // https://opennext.js.org/cloudflare/howtos/keep_names
+  "keep_names": false,
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  // One public host. Wrangler creates the DNS record and certificate for the
+  // custom domain. Keep APP_URL below identical to this pattern.
+  "routes": [{ "pattern": "khata.aback.ai", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+
+  // `bun run preview` would otherwise rewrite local requests to the route's
+  // host (khata.aback.ai), which does not match APP_URL in .dev.vars.
+  "dev": { "host": "localhost:3000", "port": 3000 },
+
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "khata" }],
+
+  // The application database. The schema lives in src/server/db/schema.ts and
+  // the SQL migrations generated from it live in migrations/.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "khata",
+      "database_id": "dc70d4f5-a966-44dd-88c4-f816c818378e",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Cloudflare Email Sending. The Worker can only send as the addresses listed
+  // here. The domain is onboarded with `wrangler email sending enable khata.aback.ai`.
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "allowed_sender_addresses": ["noreply@khata.aback.ai"]
+    }
+  ],
+
+  // Abuse limits, enforced per Cloudflare location. Namespace ids are unique
+  // per account; the 41xx range belongs to Khata.
+  "ratelimits": [
+    // Sign-in codes sent to one email address.
+    { "name": "OTP_EMAIL_LIMITER", "namespace_id": "4101", "simple": { "limit": 3, "period": 60 } },
+    // Sign-in attempts from one IP address.
+    { "name": "AUTH_IP_LIMITER", "namespace_id": "4102", "simple": { "limit": 30, "period": 60 } },
+    // Invitations and reminders a single user can send.
+    { "name": "OUTBOUND_EMAIL_LIMITER", "namespace_id": "4103", "simple": { "limit": 20, "period": 60 } }
+  ],
+
+  // Non-secret configuration. Secrets go through `wrangler secret put`:
+  //   BETTER_AUTH_SECRET    (required, 32+ random characters)
+  //   GOOGLE_CLIENT_ID      (optional, enables "Continue with Google")
+  //   GOOGLE_CLIENT_SECRET  (optional, pairs with the id)
+  "vars": {
+    "APP_URL": "https://khata.aback.ai",
+    "EMAIL_FROM": "noreply@khata.aback.ai",
+    "EMAIL_FROM_NAME": "Khata"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

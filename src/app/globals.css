@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@aback-ui/tokens/tokens.css";
+
+/* Tailwind v4 does not scan node_modules: point it at the component library. */
+@source "../../node_modules/@aback-ui/ui/dist";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Amounts line up in columns everywhere. */
+  .tabular-nums,
+  [data-amount] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Room for the bottom navigation on phones, including the home indicator. */
+@utility pb-safe-nav {
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}

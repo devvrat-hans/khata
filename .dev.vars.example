@@ -1,0 +1,13 @@
+# Copy to .dev.vars for local development. Never commit .dev.vars.
+#
+# Signs session cookies. Generate one with: openssl rand -base64 48
+BETTER_AUTH_SECRET=replace-with-a-long-random-string
+
+# The local origin. Overrides APP_URL from wrangler.jsonc while developing.
+APP_URL=http://localhost:3000
+
+# Optional: Google sign in. Create an OAuth client at
+# https://console.cloud.google.com/apis/credentials with the redirect URI
+# http://localhost:3000/api/auth/callback/google
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=

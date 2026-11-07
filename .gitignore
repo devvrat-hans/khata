@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# next.js and opennext output
+.next/
+.open-next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# cloudflare
+cloudflare-env.d.ts
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# env files
+.env
+.env.*
+!.env.example
+
+# misc
+.DS_Store
+*.log
+coverage/
+
+# local editor and agent tooling
+.claude/
