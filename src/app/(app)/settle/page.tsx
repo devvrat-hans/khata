@@ -55,7 +55,7 @@ export default async function SettlePage({
     const to = one(params.to);
     const currency = requestedCurrency && isSupportedCurrency(requestedCurrency) ? requestedCurrency : group.currency;
     return (
-      <div className="flex max-w-2xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
         <PageTitle
           eyebrow={
             <Link href={`/groups/${group.id}`} className="hover:text-foreground">
@@ -65,7 +65,7 @@ export default async function SettlePage({
           title="Record a payment"
           description="Pay back what you owe, or record money you received."
         />
-        <div className="border border-border bg-card p-5 shadow-sm sm:p-6">
+        <div className="border border-border bg-card p-5 sm:p-6">
           <SettleForm
             viewer={asPerson(viewer)}
             context={{
@@ -104,7 +104,7 @@ export default async function SettlePage({
     const from = one(params.from);
     const to = one(params.to);
     return (
-      <div className="flex max-w-2xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
         <PageTitle
           eyebrow={
             <Link href={`/people/${person.id}`} className="hover:text-foreground">
@@ -114,7 +114,7 @@ export default async function SettlePage({
           title="Record a payment"
           description="This settles your one to one hisab. To settle a balance from a group, record it in that group."
         />
-        <div className="border border-border bg-card p-5 shadow-sm sm:p-6">
+        <div className="border border-border bg-card p-5 sm:p-6">
           <SettleForm
             viewer={asPerson(viewer)}
             context={{
@@ -141,7 +141,7 @@ export default async function SettlePage({
   const owedToYou = suggestions.filter((suggestion) => suggestion.amount > 0);
 
   return (
-    <div className="flex max-w-3xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
       <PageTitle
         title="Settle up"
         description="Every open balance, where it lives. Record a payment in the same place so every balance stays right."

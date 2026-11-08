@@ -1,4 +1,4 @@
-import { Badge, Button } from "@aback-ui/ui";
+import { Badge, Button, RelativeTime } from "@aback-ui/ui";
 import { IconArrowLeft, IconLock, IconPencil } from "@tabler/icons-react";
 import { eq } from "drizzle-orm";
 import type { Metadata } from "next";
@@ -57,7 +57,7 @@ export default async function ExpensePage({ params }: { params: Promise<{ expens
   const net = paid - share;
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <div>
         <Link href={backHref} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <IconArrowLeft aria-hidden="true" className="size-4" />
@@ -115,7 +115,7 @@ export default async function ExpensePage({ params }: { params: Promise<{ expens
       ) : null}
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <section aria-labelledby="paid-heading" className="border border-border bg-card shadow-sm">
+        <section aria-labelledby="paid-heading" className="border border-border bg-card">
           <h2 id="paid-heading" className="border-b border-border px-4 py-3 text-base font-semibold">
             Paid by
           </h2>
@@ -132,7 +132,7 @@ export default async function ExpensePage({ params }: { params: Promise<{ expens
             })}
           </ul>
         </section>
-        <section aria-labelledby="split-heading" className="border border-border bg-card shadow-sm">
+        <section aria-labelledby="split-heading" className="border border-border bg-card">
           <h2 id="split-heading" className="flex items-center justify-between border-b border-border px-4 py-3 text-base font-semibold">
             Split
             <span className="text-xs font-normal text-muted-foreground">{SPLIT_METHOD_LABELS[record.splitMethod]}</span>
@@ -163,7 +163,7 @@ export default async function ExpensePage({ params }: { params: Promise<{ expens
       </div>
 
       {record.notes ? (
-        <section aria-labelledby="notes-heading" className="border border-border bg-card p-4 shadow-sm">
+        <section aria-labelledby="notes-heading" className="border border-border bg-card p-4">
           <h2 id="notes-heading" className="text-sm font-semibold">
             Notes
           </h2>
@@ -179,14 +179,13 @@ export default async function ExpensePage({ params }: { params: Promise<{ expens
           {changes.length > 0 ? (
             changes.map((row) => (
               <li key={row.id}>
-                {nameOf(row.actorId)} {row.type === "expense.created" ? "added this" : "edited this"} on{" "}
-                {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(row.createdAt)}
+                {nameOf(row.actorId)} {row.type === "expense.created" ? "added this" : "edited this"},{" "}
+                <RelativeTime date={row.createdAt} />
               </li>
             ))
           ) : (
             <li>
-              Added by {nameOf(record.createdBy)} on{" "}
-              {new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(record.createdAt)}
+              Added by {nameOf(record.createdBy)}, <RelativeTime date={record.createdAt} />
             </li>
           )}
         </ul>

@@ -44,8 +44,8 @@ export interface ActivityQuery {
   personId?: string;
   /** The history of one expense. The caller has already checked the viewer can see it. */
   expenseId?: string;
-  /** Only rows created before this time, for paging. */
-  before?: Date;
+  /** Only rows after this one in feed order, for paging. */
+  before?: { createdAt: Date; id: string };
   limit?: number;
 }
 
@@ -84,7 +84,15 @@ export async function listActivity(db: Database, viewerId: string, query: Activi
       ),
     );
   }
-  if (query.before) conditions.push(lt(activities.createdAt, query.before));
+  if (query.before) {
+    // Rows written in one batch share a timestamp, so the id breaks the tie.
+    conditions.push(
+      or(
+        lt(activities.createdAt, query.before.createdAt),
+        and(eq(activities.createdAt, query.before.createdAt), lt(activities.id, query.before.id)),
+      ),
+    );
+  }
 
   return db
     .select()

@@ -20,7 +20,7 @@ export function SuggestionList({ suggestions, people }: { suggestions: SettleSug
               ? `Private in ${suggestion.groupName ?? "a group"}`
               : (suggestion.groupName ?? "A group");
         return (
-          <li key={suggestion.key} className="flex items-center gap-3 px-4 py-3">
+          <li key={suggestion.key} className="flex min-h-16 items-center gap-3 px-4 py-3">
             {person ? <PersonAvatar person={person} /> : null}
             <span className="min-w-0 flex-1">
               <span className="block text-sm">
@@ -40,12 +40,12 @@ export function SuggestionList({ suggestions, people }: { suggestions: SettleSug
                   </>
                 )}
               </span>
-              <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+              <span className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
                 {suggestion.source === "private" ? <IconLock aria-hidden="true" className="size-3" /> : null}
                 {where}
               </span>
             </span>
-            <Button asChild size="sm" variant={owesYou ? "outline" : "default"}>
+            <Button asChild size="sm" variant={owesYou ? "outline" : "brand"}>
               <Link href={suggestion.href}>{owesYou ? "Record" : "Settle"}</Link>
             </Button>
           </li>

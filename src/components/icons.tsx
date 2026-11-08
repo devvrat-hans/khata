@@ -52,17 +52,20 @@ export const GROUP_KIND_ICONS: Record<GroupKindValue, TablerIcon> = {
 export function IconChip({
   icon: Icon,
   size = "md",
+  tone = "brand",
   className = "",
 }: {
   icon: TablerIcon;
   size?: "sm" | "md" | "lg";
+  /** Neutral for long lists, where blue on every row would stop meaning anything. */
+  tone?: "brand" | "neutral";
   className?: string;
 }) {
   const box = size === "sm" ? "size-8" : size === "lg" ? "size-12" : "size-10";
   const glyph = size === "sm" ? "size-4" : size === "lg" ? "size-6" : "size-5";
   return (
     <span
-      className={`flex ${box} shrink-0 items-center justify-center bg-primary-100 text-primary-600 dark:bg-primary-900 dark:text-primary-400 ${className}`}
+      className={`flex ${box} shrink-0 items-center justify-center ${tone === "brand" ? "bg-primary-100 text-primary-600 dark:bg-primary-900 dark:text-primary-400" : "bg-muted text-muted-foreground"} ${className}`}
     >
       <Icon aria-hidden="true" className={glyph} />
     </span>

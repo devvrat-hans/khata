@@ -1,13 +1,18 @@
 import { Badge } from "@aback-ui/ui";
-import { IconCash, IconChevronRight, IconLock } from "@tabler/icons-react";
+import { IconCash, IconLock } from "@tabler/icons-react";
 import Link from "next/link";
 import { Fragment } from "react";
 import { formatMoney } from "@/domain/money";
-import { dayParts, formatMonth } from "@/lib/format";
+import { dayParts, firstName, formatMonth } from "@/lib/format";
+import { PAYMENT_METHOD_LABELS } from "@/lib/labels";
 import type { PeopleIndex } from "@/server/queries";
 import type { ExpenseRecord, LedgerRecord, SettlementRecord } from "@/server/services/ledger";
 import { DeletePaymentButton } from "./delete-payment-button";
 import { CATEGORY_ICONS } from "./icons";
+
+function shortName(people: PeopleIndex, id: string, viewerId: string): string {
+  return id === viewerId ? "you" : firstName(people[id]?.name ?? "someone");
+}
 
 function name(people: PeopleIndex, id: string, viewerId: string, capital = false): string {
   if (id === viewerId) return capital ? "You" : "you";
@@ -37,12 +42,12 @@ function ExpenseImpact({ record, viewerId }: { record: ExpenseRecord; viewerId: 
   const paid = record.payers.find((payer) => payer.userId === viewerId)?.amount ?? 0;
   const share = record.shares.find((portion) => portion.userId === viewerId)?.amount ?? 0;
   const net = paid - share;
-  if (paid === 0 && share === 0) return <span className="text-xs text-muted-foreground">not involved</span>;
-  if (net === 0) return <span className="text-xs text-muted-foreground">your share is paid</span>;
+  if (paid === 0 && share === 0) return <span className="shrink-0 text-sm text-muted-foreground">not involved</span>;
+  if (net === 0) return <span className="shrink-0 text-sm text-muted-foreground">even</span>;
   return (
-    <span className="flex flex-col items-end text-right">
+    <span className="flex shrink-0 flex-col items-end text-right">
       <span className={net > 0 ? "text-xs text-success" : "text-xs text-danger"}>{net > 0 ? "you lent" : "you borrowed"}</span>
-      <span className={net > 0 ? "text-sm font-semibold tabular-nums text-success" : "text-sm font-semibold tabular-nums text-danger"}>
+      <span className={net > 0 ? "text-base font-semibold tabular-nums text-success" : "text-base font-semibold tabular-nums text-danger"}>
         {formatMoney(net, record.currency)}
       </span>
     </span>
@@ -57,7 +62,7 @@ function privateLabel(record: LedgerRecord, people: PeopleIndex, viewerId: strin
     return (
       <Badge variant="brand" className="gap-1">
         <IconLock aria-hidden="true" className="size-3" />
-        {showGroup ? `Private in ${groupName ?? "a group"}` : `Private with ${other ? name(people, other, viewerId) : "one person"}`}
+        {showGroup ? `Private in ${groupName ?? "a group"}` : `Private with ${other ? shortName(people, other, viewerId) : "one person"}`}
       </Badge>
     );
   }
@@ -79,21 +84,20 @@ function ExpenseItem({
   return (
     <Link
       href={`/expenses/${record.id}`}
-      className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none"
+      className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring"
     >
       <DateBadge date={record.date} />
-      <span className="hidden size-10 shrink-0 items-center justify-center bg-primary-100 text-primary-600 sm:flex dark:bg-primary-900 dark:text-primary-400">
+      <span className="hidden size-10 shrink-0 items-center justify-center bg-muted text-muted-foreground sm:flex">
         <Icon aria-hidden="true" className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-foreground">{record.description}</span>
-        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+        <span className="block truncate text-base font-medium text-foreground">{record.description}</span>
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
           {payersText(record, people, viewerId)}
           {privateLabel(record, people, viewerId, groupNames)}
         </span>
       </span>
       <ExpenseImpact record={record} viewerId={viewerId} />
-      <IconChevronRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
     </Link>
   );
 }
@@ -118,21 +122,25 @@ function SettlementItem({
         <IconCash aria-hidden="true" className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium text-foreground">
-          {name(people, record.fromUserId, viewerId, true)} paid {name(people, record.toUserId, viewerId)} {amount}
+        <span className="block text-base font-medium text-foreground">
+          {name(people, record.fromUserId, viewerId, true)} paid {name(people, record.toUserId, viewerId)}
         </span>
-        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-          Payment{record.note ? `: ${record.note}` : ""}
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+          {PAYMENT_METHOD_LABELS[record.method]}
+          {record.note ? `: ${record.note}` : ""}
           {privateLabel(record, people, viewerId, groupNames)}
         </span>
       </span>
-      {involved ? (
-        <span className="flex flex-col items-end text-right">
-          <span className="text-xs text-muted-foreground">{record.fromUserId === viewerId ? "you paid" : "you received"}</span>
-          <span className="text-sm font-semibold tabular-nums text-foreground">{amount}</span>
+      <DeletePaymentButton
+        settlementId={record.id}
+        label={`${name(people, record.fromUserId, viewerId, true)} paid ${name(people, record.toUserId, viewerId)} ${amount}`}
+      />
+      <span className="flex shrink-0 flex-col items-end text-right">
+        <span className="text-xs text-muted-foreground">
+          {!involved ? "payment" : record.fromUserId === viewerId ? "you paid" : "you received"}
         </span>
-      ) : null}
-      <DeletePaymentButton settlementId={record.id} label={`${name(people, record.fromUserId, viewerId, true)} paid ${name(people, record.toUserId, viewerId)} ${amount}`} />
+        <span className="text-base font-semibold tabular-nums text-foreground">{amount}</span>
+      </span>
     </div>
   );
 }

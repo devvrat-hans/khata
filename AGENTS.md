@@ -6,7 +6,7 @@ The engineering contract for anyone, human or AI agent, changing Khata. Read it 
 
 Khata is a Splitwise-style app for shared expenses: groups, one to one hisabs between two people, and its signature feature, a **private hisab inside a group**: an expense or payment between two members that the rest of the group never sees.
 
-- Production: `https://khata.aback.ai` (one Cloudflare Worker, one D1 database)
+- Production: `https://khata.aback.group` (one Cloudflare Worker, one D1 database)
 - License: MIT. The Khata and Aback names and marks are not covered by it.
 
 ## 2. Stack

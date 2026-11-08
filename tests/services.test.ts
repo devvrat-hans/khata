@@ -264,6 +264,44 @@ describe("private hisab inside a group", () => {
     await deleteGroup(db, asha, group.id);
     expect(await listGroups(db, asha)).toEqual([]);
   });
+
+  it("stops the last member closing a group that still has an open private hisab", async () => {
+    const group = await tripWithEveryone();
+    await createExpense(
+      db,
+      bilal,
+      expense({
+        groupId: group.id,
+        isPrivate: true,
+        personId: asha,
+        payers: [{ userId: bilal }],
+        participants: [{ userId: asha }],
+      }),
+    );
+    await leaveGroup(db, bilal, group.id);
+    await leaveGroup(db, chen, group.id);
+    // Closing the group would hide what Asha owes Bilal.
+    await expectAppError(leaveGroup(db, asha, group.id), "conflict");
+    expect((await balancesFor(bilal)).owed).toEqual({ INR: 90000 });
+  });
+});
+
+describe("activity feed", () => {
+  it("pages through rows that share a timestamp without losing any", async () => {
+    await tripWithEveryone();
+    const all = await listActivity(db, asha, { limit: 100 });
+    expect(all.length).toBeGreaterThan(2);
+
+    const seen: string[] = [];
+    let before: { createdAt: Date; id: string } | undefined;
+    for (let page = 0; page <= all.length; page += 1) {
+      const [row] = await listActivity(db, asha, { limit: 1, before });
+      if (!row) break;
+      seen.push(row.id);
+      before = { createdAt: row.createdAt, id: row.id };
+    }
+    expect(seen).toEqual(all.map((row) => row.id));
+  });
 });
 
 describe("one to one hisab", () => {
@@ -326,5 +364,12 @@ describe("accounts", () => {
     expect(await listGroups(db, chen)).toEqual([]);
     const people = await listConnectedPeople(db, asha);
     expect(people.has(chen)).toBe(false);
+  });
+
+  it("drops a deleted person from the people list even with a one to one hisab", async () => {
+    await addFriend(db, asha, { email: "chen@example.com" });
+    expect((await listConnectedPeople(db, asha)).has(chen)).toBe(true);
+    await deleteAccount(db, chen);
+    expect((await listConnectedPeople(db, asha)).has(chen)).toBe(false);
   });
 });

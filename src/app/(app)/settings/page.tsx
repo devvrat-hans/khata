@@ -10,10 +10,10 @@ export default async function SettingsPage() {
   const viewer = await requireOnboardedViewer();
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <PageTitle title="Settings" description={`Signed in as ${viewer.email}`} />
 
-      <section aria-labelledby="profile-heading" className="border border-border bg-card shadow-sm">
+      <section aria-labelledby="profile-heading" className="border border-border bg-card">
         <h2 id="profile-heading" className="border-b border-border px-5 py-4 text-lg font-semibold">
           Profile and preferences
         </h2>
@@ -30,7 +30,7 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      <section aria-labelledby="data-heading" className="border border-border bg-card shadow-sm">
+      <section aria-labelledby="data-heading" className="border border-border bg-card">
         <h2 id="data-heading" className="border-b border-border px-5 py-4 text-lg font-semibold">
           Your data
         </h2>
@@ -46,7 +46,7 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      <section aria-labelledby="danger-heading" className="border border-danger/30 bg-card shadow-sm">
+      <section aria-labelledby="danger-heading" className="border border-danger/30 bg-card">
         <h2 id="danger-heading" className="border-b border-danger/30 px-5 py-4 text-lg font-semibold">
           Delete account
         </h2>

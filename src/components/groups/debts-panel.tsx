@@ -1,10 +1,8 @@
-import { Badge, Button } from "@aback-ui/ui";
-import { IconArrowRight, IconInfoCircle } from "@tabler/icons-react";
+import { Button, cn } from "@aback-ui/ui";
 import Link from "next/link";
 import type { Debt, DebtsByCurrency } from "@/domain/balances";
 import { formatMoney, toDecimalString } from "@/domain/money";
 import type { PeopleIndex } from "@/server/queries";
-import { PersonAvatar } from "../person-avatar";
 
 function settleHref(groupId: string, debt: Debt, currency: string): string {
   const params = new URLSearchParams({
@@ -42,50 +40,44 @@ export function DebtsPanel({
   const nameOf = (id: string) => (id === viewerId ? "You" : (people[id]?.name ?? "Someone"));
 
   return (
-    <section aria-labelledby="balances-heading" className="border border-border bg-card shadow-sm">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-        <h2 id="balances-heading" className="text-base font-semibold">
-          Balances
-        </h2>
-        {simplified ? (
-          <Badge variant="brand" title="Debts are combined so the group settles with the fewest payments.">
-            Simplified
-          </Badge>
-        ) : null}
-      </div>
-      {rows.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-muted-foreground">Everyone is settled up.</p>
-      ) : (
-        <ul className="divide-y divide-border">
-          {rows.map(({ currency, debt }) => {
-            const from = people[debt.fromUserId];
-            const to = people[debt.toUserId];
-            const involvesViewer = debt.fromUserId === viewerId || debt.toUserId === viewerId;
-            return (
-              <li key={`${currency}-${debt.fromUserId}-${debt.toUserId}`} className="flex items-center gap-3 px-4 py-3">
-                <span className="flex shrink-0 items-center gap-1">
-                  {from ? <PersonAvatar person={from} size="xs" /> : null}
-                  <IconArrowRight aria-hidden="true" className="size-3.5 text-muted-foreground" />
-                  {to ? <PersonAvatar person={to} size="xs" /> : null}
-                </span>
-                <span className="min-w-0 flex-1 text-sm">
+    <section aria-labelledby="balances-heading" className="border border-border bg-card">
+      <h2 id="balances-heading" className="px-4 pt-3 pb-1 text-base font-semibold">
+        Who owes whom
+      </h2>
+      <ul>
+        {rows.map(({ currency, debt }) => {
+          const owedToViewer = debt.toUserId === viewerId;
+          const viewerOwes = debt.fromUserId === viewerId;
+          return (
+            <li key={`${currency}-${debt.fromUserId}-${debt.toUserId}`} className="flex items-center gap-3 px-4 py-2.5">
+              <span className="min-w-0 flex-1 text-sm">
+                <span className="block truncate">
                   <span className="font-medium">{nameOf(debt.fromUserId)}</span>
-                  <span className="text-muted-foreground">{debt.fromUserId === viewerId ? " owe " : " owes "}</span>
-                  <span className="font-medium">{debt.toUserId === viewerId ? "you" : nameOf(debt.toUserId)}</span>
-                  <span className="mt-0.5 block font-semibold tabular-nums">{formatMoney(debt.amount, currency)}</span>
+                  <span className="text-muted-foreground">{viewerOwes ? " owe " : " owes "}</span>
+                  <span className="font-medium">{owedToViewer ? "you" : nameOf(debt.toUserId)}</span>
                 </span>
-                <Button asChild size="sm" variant={involvesViewer ? "default" : "outline"}>
-                  <Link href={settleHref(groupId, debt, currency)}>Settle</Link>
-                </Button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-      {simplified && rows.length > 0 ? (
-        <p className="flex items-start gap-2 border-t border-border bg-muted/20 px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
-          <IconInfoCircle aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-          Debts are combined, so the group settles with the fewest payments. Turn this off in group settings.
+                <span
+                  className={cn(
+                    "mt-0.5 block text-base font-semibold tabular-nums",
+                    owedToViewer ? "text-success" : viewerOwes ? "text-danger" : "text-foreground",
+                  )}
+                >
+                  {formatMoney(debt.amount, currency)}
+                </span>
+              </span>
+              <Button asChild size="sm" variant="outline">
+                <Link href={settleHref(groupId, debt, currency)}>Settle</Link>
+              </Button>
+            </li>
+          );
+        })}
+      </ul>
+      {simplified ? (
+        <p className="border-t border-border px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
+          Combined into the fewest payments.{" "}
+          <Link href={`/groups/${groupId}/settings`} className="text-link hover:underline">
+            Change this
+          </Link>
         </p>
       ) : null}
     </section>

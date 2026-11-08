@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please do not open a public issue for a security problem. Email **support@aback.ai** with:
+Please do not open a public issue for a security problem. Email **hi@aback.group** with:
 
 - what you found and where,
 - steps to reproduce it,
@@ -19,7 +19,7 @@ Things we especially want to hear about:
 
 ## Scope
 
-The deployment at `khata.aback.ai` and the code in this repository. Please do not run automated scanners against production, test against real people's accounts, or send email to addresses you do not own. Use a local copy (see the README) for testing.
+The deployment at `khata.aback.group` and the code in this repository. Please do not run automated scanners against production, test against real people's accounts, or send email to addresses you do not own. Use a local copy (see the README) for testing.
 
 ## Supported versions
 

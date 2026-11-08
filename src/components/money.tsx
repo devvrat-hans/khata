@@ -1,4 +1,5 @@
 import { cn } from "@aback-ui/ui";
+import { splitDirections } from "@/domain/balances";
 import { formatMoney, type MoneyByCurrency } from "@/domain/money";
 
 /** One amount in one currency, always with tabular figures. */
@@ -86,18 +87,53 @@ export function BalanceText({
     <span className={cn("inline-flex flex-wrap items-baseline gap-x-1.5", className)}>
       {hasPositive ? (
         <span className={toneClass.owed}>
-          {subject ? `${subject} owes you ` : "you are owed "}
+          {subject ? `${subject} owes you ` : "You are owed "}
           <MoneyList money={positive} className="font-semibold" />
         </span>
       ) : null}
       {hasPositive && hasNegative ? <span className="text-muted-foreground">and</span> : null}
       {hasNegative ? (
         <span className={toneClass.owes}>
-          {subject ? `you owe ${subject} ` : "you owe "}
+          {hasPositive ? "you" : "You"} owe {subject ? `${subject} ` : ""}
           <MoneyList money={negative} className="font-semibold" />
         </span>
       ) : null}
     </span>
+  );
+}
+
+function Figure({ label, money, tone }: { label: string; money: MoneyByCurrency; tone: "owed" | "owes" }) {
+  return (
+    <div className="min-w-0">
+      <p className={cn("text-sm font-medium", toneClass[tone])}>{label}</p>
+      <p className={cn("mt-0.5 text-3xl font-extrabold tracking-tight break-words sm:text-4xl", toneClass[tone])}>
+        <MoneyList money={money} />
+      </p>
+    </div>
+  );
+}
+
+/** The one number a page is about, large, with its meaning in words. */
+export function BalanceHeadline({
+  balance,
+  owedLabel = "You are owed",
+  owesLabel = "You owe",
+  settledLabel = "You are settled up",
+}: {
+  balance: MoneyByCurrency;
+  owedLabel?: string;
+  owesLabel?: string;
+  settledLabel?: string;
+}) {
+  const { owed, owes } = splitDirections(balance);
+  const hasOwed = Object.keys(owed).length > 0;
+  const hasOwes = Object.keys(owes).length > 0;
+  if (!hasOwed && !hasOwes) return <p className="text-2xl font-bold tracking-tight text-muted-foreground">{settledLabel}</p>;
+  return (
+    <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:gap-10">
+      {hasOwed ? <Figure label={owedLabel} money={owed} tone="owed" /> : null}
+      {hasOwes ? <Figure label={owesLabel} money={owes} tone="owes" /> : null}
+    </div>
   );
 }
 
@@ -121,20 +157,20 @@ export function BalanceBadge({
     if (value < 0) negative[currency] = -value;
   }
   if (tone === "even") {
-    return <span className={cn("text-xs text-muted-foreground", className)}>settled up</span>;
+    return <span className={cn("shrink-0 text-sm text-muted-foreground", className)}>settled up</span>;
   }
   return (
-    <span className={cn("flex flex-col items-end gap-0.5 text-right", className)}>
+    <span className={cn("flex shrink-0 flex-col items-end gap-0.5 text-right", className)}>
       {Object.keys(positive).length > 0 ? (
         <span className="flex flex-col items-end">
           <span className="text-xs text-success">{owedLabel}</span>
-          <MoneyList money={positive} className="text-sm font-semibold text-success" />
+          <MoneyList money={positive} className="text-base font-semibold text-success" />
         </span>
       ) : null}
       {Object.keys(negative).length > 0 ? (
         <span className="flex flex-col items-end">
           <span className="text-xs text-danger">{owesLabel}</span>
-          <MoneyList money={negative} className="text-sm font-semibold text-danger" />
+          <MoneyList money={negative} className="text-base font-semibold text-danger" />
         </span>
       ) : null}
     </span>

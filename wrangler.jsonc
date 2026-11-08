@@ -23,12 +23,12 @@
 
   // One public host. Wrangler creates the DNS record and certificate for the
   // custom domain. Keep APP_URL below identical to this pattern.
-  "routes": [{ "pattern": "khata.aback.ai", "custom_domain": true }],
+  "routes": [{ "pattern": "khata.aback.group", "custom_domain": true }],
   "workers_dev": false,
   "preview_urls": false,
 
   // `bun run preview` would otherwise rewrite local requests to the route's
-  // host (khata.aback.ai), which does not match APP_URL in .dev.vars.
+  // host (khata.aback.group), which does not match APP_URL in .dev.vars.
   "dev": { "host": "localhost:3000", "port": 3000 },
 
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "khata" }],
@@ -45,11 +45,11 @@
   ],
 
   // Cloudflare Email Sending. The Worker can only send as the addresses listed
-  // here. The domain is onboarded with `wrangler email sending enable khata.aback.ai`.
+  // here. The domain is onboarded with `wrangler email sending enable khata.aback.group`.
   "send_email": [
     {
       "name": "EMAIL",
-      "allowed_sender_addresses": ["noreply@khata.aback.ai"]
+      "allowed_sender_addresses": ["noreply@khata.aback.group"]
     }
   ],
 
@@ -69,8 +69,8 @@
   //   GOOGLE_CLIENT_ID      (optional, enables "Continue with Google")
   //   GOOGLE_CLIENT_SECRET  (optional, pairs with the id)
   "vars": {
-    "APP_URL": "https://khata.aback.ai",
-    "EMAIL_FROM": "noreply@khata.aback.ai",
+    "APP_URL": "https://khata.aback.group",
+    "EMAIL_FROM": "noreply@khata.aback.group",
     "EMAIL_FROM_NAME": "Khata"
   },
 

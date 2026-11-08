@@ -50,7 +50,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="min-h-dvh bg-background font-sans text-foreground antialiased">
         {children}
-        <Toaster position="top-center" />
+        <Toaster position="bottom-right" mobileOffset={{ bottom: "5rem" }} />
       </body>
     </html>
   );

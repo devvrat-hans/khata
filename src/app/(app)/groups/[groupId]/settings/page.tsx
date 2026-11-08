@@ -21,7 +21,7 @@ export const metadata: Metadata = { title: "Group settings" };
 
 function Section({ id, title, description, children }: { id?: string; title: string; description?: string; children: React.ReactNode }) {
   return (
-    <section id={id} aria-labelledby={`${id ?? title}-heading`} className="scroll-mt-20 border border-border bg-card shadow-sm">
+    <section id={id} aria-labelledby={`${id ?? title}-heading`} className="scroll-mt-20 border border-border bg-card">
       <div className="border-b border-border px-5 py-4">
         <h2 id={`${id ?? title}-heading`} className="text-lg font-semibold">
           {title}
@@ -51,7 +51,7 @@ export default async function GroupSettingsPage({ params }: { params: Promise<{ 
   const isOwner = role === "owner";
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <div>
         <Link
           href={`/groups/${group.id}`}

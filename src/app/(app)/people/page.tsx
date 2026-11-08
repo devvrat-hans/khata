@@ -28,7 +28,7 @@ export default async function PeoplePage({
         description="Everyone you share costs with, and where you stand with each of them across groups and one to one hisabs."
       />
 
-      <section aria-labelledby="add-heading" className="border border-border bg-card p-5 shadow-sm">
+      <section aria-labelledby="add-heading" className="border border-border bg-card p-5">
         <h2 id="add-heading" className="text-lg font-semibold">
           Start a one to one hisab
         </h2>

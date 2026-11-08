@@ -38,10 +38,14 @@ describe("formatMoney", () => {
     expect(formatMoney(125050, "INR")).toBe("₹1,250.50");
     expect(formatMoney(-125050, "INR")).toBe("₹1,250.50");
     expect(formatMoney(1500, "JPY", "en-US")).toBe("¥1,500");
+    expect(formatMoney(125000, "INR")).toBe("₹1,250");
+    expect(formatMoney(125005, "INR")).toBe("₹1,250.05");
+    expect(formatMoney(0, "INR")).toBe("₹0");
+    expect(formatMoney(1500, "KWD", "en-US")).toContain("1.50");
   });
 
   it("joins several currencies, largest first", () => {
-    expect(formatMoneyList({ USD: 500, INR: 10000 }, "en-US")).toBe("₹100.00 + $5.00");
+    expect(formatMoneyList({ USD: 500, INR: 10000 }, "en-US")).toBe("₹100 + $5");
   });
 });
 

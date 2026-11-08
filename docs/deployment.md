@@ -1,6 +1,6 @@
 # Deploying Khata
 
-Khata is one Cloudflare Worker with one D1 database. This guide deploys it from scratch. The production instance at `khata.aback.ai` was set up exactly this way.
+Khata is one Cloudflare Worker with one D1 database. This guide deploys it from scratch. The production instance at `khata.aback.group` was set up exactly this way.
 
 ## What you need
 

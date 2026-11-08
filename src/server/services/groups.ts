@@ -53,9 +53,17 @@ export async function listMembers(db: Database, groupId: string): Promise<GroupM
     .innerJoin(user, eq(user.id, groupMembers.userId))
     .where(and(eq(groupMembers.groupId, groupId), isNull(groupMembers.leftAt)))
     .orderBy(asc(groupMembers.createdAt));
+  // Owners first, then by when they were added. People added together share a
+  // timestamp, so name and id break the tie and keep the order stable.
   return rows
     .map((row) => ({ ...toPersonSummary(row.user), role: row.member.role, addedAt: row.member.createdAt }))
-    .sort((a, b) => (a.role === b.role ? a.addedAt.getTime() - b.addedAt.getTime() : a.role === "owner" ? -1 : 1));
+    .sort(
+      (a, b) =>
+        (a.role === b.role ? 0 : a.role === "owner" ? -1 : 1) ||
+        a.addedAt.getTime() - b.addedAt.getTime() ||
+        a.name.localeCompare(b.name) ||
+        a.id.localeCompare(b.id),
+    );
 }
 
 /** Everyone who was ever in the group, for naming people on old expenses. */
@@ -209,6 +217,36 @@ async function memberSharedBalance(db: Database, group: Group, userId: string): 
   return computeGroupDebts(ledger, group.simplifyDebts).netByUser.get(userId) ?? {};
 }
 
+/**
+ * Throws unless every private hisab inside the group is settled, even the ones
+ * the viewer cannot see, because closing a group hides them for good.
+ */
+async function assertPrivateHisabsSettled(db: Database, groupId: string): Promise<void> {
+  const privateLedger = await loadLedger(db, {
+    expenses: and(eq(expenses.groupId, groupId), eq(expenses.visibility, "pair"), isNull(expenses.deletedAt)),
+    settlements: and(
+      eq(settlements.groupId, groupId),
+      eq(settlements.visibility, "pair"),
+      isNull(settlements.deletedAt),
+    ),
+  });
+  const pairs = new Set(
+    [...privateLedger.expenses, ...privateLedger.settlements].map((record) => `${record.pairA}|${record.pairB}`),
+  );
+  for (const pair of pairs) {
+    const [a, b] = pair.split("|");
+    if (!a || !b) continue;
+    const subset = {
+      expenses: privateLedger.expenses.filter((record) => record.pairA === a && record.pairB === b),
+      settlements: privateLedger.settlements.filter((record) => record.pairA === a && record.pairB === b),
+    };
+    const balance = computePairBalances(a, subset).get(b) ?? {};
+    if (!isZero(balance)) {
+      throw conflict("Some private hisabs in this group are not settled yet. They need to be settled first.");
+    }
+  }
+}
+
 /** Leaves a group. Only possible once the shared balance is settled. */
 export async function leaveGroup(db: Database, viewerId: string, groupId: string): Promise<void> {
   const { group, role } = await requireMembership(db, groupId, viewerId);
@@ -246,7 +284,8 @@ export async function leaveGroup(db: Database, viewerId: string, groupId: string
           .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, successor.userId))),
       );
     } else {
-      // The last person out closes the group.
+      // The last person out closes the group, which hides its private hisabs.
+      await assertPrivateHisabsSettled(db, groupId);
       statements.push(db.update(groups).set({ deletedAt: new Date() }).where(eq(groups.id, groupId)));
     }
   }
@@ -295,30 +334,7 @@ export async function deleteGroup(db: Database, viewerId: string, groupId: strin
     throw conflict("Everyone has to be settled up before the group can be deleted.");
   }
 
-  // Private hisabs inside the group must be settled too, even the ones the owner cannot see.
-  const privateLedger = await loadLedger(db, {
-    expenses: and(eq(expenses.groupId, groupId), eq(expenses.visibility, "pair"), isNull(expenses.deletedAt)),
-    settlements: and(
-      eq(settlements.groupId, groupId),
-      eq(settlements.visibility, "pair"),
-      isNull(settlements.deletedAt),
-    ),
-  });
-  const pairs = new Set(
-    [...privateLedger.expenses, ...privateLedger.settlements].map((record) => `${record.pairA}|${record.pairB}`),
-  );
-  for (const pair of pairs) {
-    const [a, b] = pair.split("|");
-    if (!a || !b) continue;
-    const subset = {
-      expenses: privateLedger.expenses.filter((record) => record.pairA === a && record.pairB === b),
-      settlements: privateLedger.settlements.filter((record) => record.pairA === a && record.pairB === b),
-    };
-    const balance = computePairBalances(a, subset).get(b) ?? {};
-    if (!isZero(balance)) {
-      throw conflict("Some private hisabs in this group are not settled yet. They need to be settled first.");
-    }
-  }
+  await assertPrivateHisabsSettled(db, groupId);
 
   await runBatch(db, [db.update(groups).set({ deletedAt: new Date() }).where(eq(groups.id, groupId))]);
 }

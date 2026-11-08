@@ -9,8 +9,6 @@ import {
   Select,
   Spinner,
   Switch,
-  ToggleGroup,
-  ToggleGroupItem,
   toast,
 } from "@aback-ui/ui";
 import { IconArrowRight, IconLock } from "@tabler/icons-react";
@@ -22,7 +20,6 @@ import { useLocalToday } from "@/lib/use-local-today";
 import { PAYMENT_METHOD_VALUES } from "@/lib/validation";
 import { recordPaymentAction } from "@/server/actions/expenses";
 import { CurrencySelect } from "../currency-select";
-import { PersonAvatar } from "../person-avatar";
 
 export interface SettlePerson {
   id: string;
@@ -63,7 +60,6 @@ export function SettleForm({
 
   const people = context.kind === "group" ? context.members : [viewer, context.person];
   const find = (personId: string) => people.find((person) => person.id === personId);
-  const payer = find(from);
   const receiver = find(to);
   const minor = parseAmount(amount || "0", currency) ?? 0;
   const involvesViewer = from === viewer.id || to === viewer.id;
@@ -109,7 +105,23 @@ export function SettleForm({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-6" noValidate>
-      <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+      <div className="grid grid-cols-[minmax(0,1fr)_8.5rem] gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
+        <Field htmlFor={`${id}-amount`} label="Amount" required>
+          <Input
+            id={`${id}-amount`}
+            inputMode="decimal"
+            placeholder="0"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            className="h-14 text-3xl font-bold tabular-nums"
+          />
+        </Field>
+        <Field htmlFor={`${id}-currency`} label="Currency">
+          <CurrencySelect id={`${id}-currency`} value={currency} onChange={(event) => setCurrency(event.target.value)} className="h-14" />
+        </Field>
+      </div>
+
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2 sm:gap-3">
         <Field htmlFor={`${id}-from`} label="Who paid">
           <Select id={`${id}-from`} value={from} onChange={(event) => setFrom(event.target.value)}>
             {people.map((person) => (
@@ -119,7 +131,7 @@ export function SettleForm({
             ))}
           </Select>
         </Field>
-        <IconArrowRight aria-hidden="true" className="mx-auto mb-2.5 hidden size-5 text-muted-foreground sm:block" />
+        <IconArrowRight aria-hidden="true" className="mx-auto mb-2.5 size-5 text-muted-foreground" />
         <Field htmlFor={`${id}-to`} label="Who received">
           <Select id={`${id}-to`} value={to} onChange={(event) => setTo(event.target.value)}>
             {people.map((person) => (
@@ -128,39 +140,6 @@ export function SettleForm({
               </option>
             ))}
           </Select>
-        </Field>
-      </div>
-
-      {payer && receiver ? (
-        <div className="flex items-center justify-center gap-4 border border-border bg-muted/20 p-4">
-          <span className="flex flex-col items-center gap-1 text-xs">
-            <PersonAvatar person={payer} size="lg" />
-            {label(payer.id)}
-          </span>
-          <span className="flex flex-col items-center">
-            <IconArrowRight aria-hidden="true" className="size-6 text-primary-600 dark:text-primary-400" />
-            <span className="text-sm font-semibold tabular-nums">{minor > 0 ? formatMoney(minor, currency) : ""}</span>
-          </span>
-          <span className="flex flex-col items-center gap-1 text-xs">
-            <PersonAvatar person={receiver} size="lg" />
-            {label(receiver.id)}
-          </span>
-        </div>
-      ) : null}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
-        <Field htmlFor={`${id}-amount`} label="Amount" required>
-          <Input
-            id={`${id}-amount`}
-            inputMode="decimal"
-            placeholder="0.00"
-            value={amount}
-            onChange={(event) => setAmount(event.target.value)}
-            className="h-12 text-2xl font-semibold tabular-nums"
-          />
-        </Field>
-        <Field htmlFor={`${id}-currency`} label="Currency">
-          <CurrencySelect id={`${id}-currency`} value={currency} onChange={(event) => setCurrency(event.target.value)} />
         </Field>
       </div>
 
@@ -180,22 +159,30 @@ export function SettleForm({
         </div>
       ) : null}
 
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium">Paid with</legend>
-        <ToggleGroup
-          type="single"
-          value={method}
-          onValueChange={(value) => value && setMethod(value as PaymentMethodValue)}
-          className="flex w-full flex-wrap"
-          aria-label="Payment method"
-        >
+      <div className="flex flex-col gap-2">
+        <span id={`${id}-method`} className="text-sm font-medium">
+          Paid with
+        </span>
+        <div role="radiogroup" aria-labelledby={`${id}-method`} className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           {PAYMENT_METHOD_VALUES.map((value) => (
-            <ToggleGroupItem key={value} value={value} className="flex-1">
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={method === value}
+              onClick={() => setMethod(value)}
+              className={cn(
+                "h-10 border px-2 text-sm leading-tight transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                method === value
+                  ? "border-primary-500 bg-primary-50 font-medium text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"
+                  : "border-border bg-background hover:bg-muted",
+              )}
+            >
               {PAYMENT_METHOD_LABELS[value]}
-            </ToggleGroupItem>
+            </button>
           ))}
-        </ToggleGroup>
-      </fieldset>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
         <Field htmlFor={`${id}-date`} label="Date">
@@ -232,8 +219,8 @@ export function SettleForm({
         </p>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        <Button type="submit" variant="brand" size="lg" disabled={pending}>
+      <div className="flex gap-2">
+        <Button type="submit" variant="brand" size="lg" disabled={pending} className="flex-1 sm:flex-none">
           {pending ? <Spinner size="sm" /> : null}
           {pending ? "Recording…" : "Record payment"}
         </Button>

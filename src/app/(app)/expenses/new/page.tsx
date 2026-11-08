@@ -47,9 +47,15 @@ export default async function NewExpensePage({
   if (groupId) {
     const { group, members } = await orNotFound(getGroupFormContext(db, viewer.id, groupId));
     const memberIds = members.map((member) => member.id);
-    const validPrivate = privateWith && privateWith !== viewer.id && memberIds.includes(privateWith) ? privateWith : null;
+    const firstOther = memberIds.find((memberId) => memberId !== viewer.id) ?? null;
+    const validPrivate =
+      privateWith && privateWith !== viewer.id && memberIds.includes(privateWith)
+        ? privateWith
+        : one(params.private) === "1"
+          ? firstOther
+          : null;
     return (
-      <div className="flex max-w-3xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <PageTitle
           eyebrow={
             <Link href={`/groups/${group.id}`} className="hover:text-foreground">
@@ -58,7 +64,7 @@ export default async function NewExpensePage({
           }
           title="Add an expense"
         />
-        <div className="border border-border bg-card p-5 shadow-sm sm:p-6">
+        <div>
           <ExpenseForm
             viewer={me}
             context={{
@@ -84,7 +90,7 @@ export default async function NewExpensePage({
   if (personId) {
     const person = await orNotFound(getConnectedPerson(db, viewer.id, personId));
     return (
-      <div className="flex max-w-3xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <PageTitle
           eyebrow={
             <Link href={`/people/${person.id}`} className="inline-flex items-center gap-1.5 hover:text-foreground">
@@ -94,7 +100,7 @@ export default async function NewExpensePage({
           }
           title="Add an expense"
         />
-        <div className="border border-border bg-card p-5 shadow-sm sm:p-6">
+        <div>
           <ExpenseForm
             viewer={me}
             context={{ kind: "person", person: { id: person.id, name: person.name, image: person.image } }}

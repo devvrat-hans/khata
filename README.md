@@ -4,7 +4,7 @@
 
 Khata keeps the hisab for trips, flats and friends. Split any way you like, keep some things private between two people, and settle up with as few payments as possible. It is free, open source, and runs entirely on Cloudflare.
 
-- Live: [khata.aback.ai](https://khata.aback.ai)
+- Live: [khata.aback.group](https://khata.aback.group)
 - Made by [Aback Group](https://aback.group). MIT licensed.
 
 ## What it does

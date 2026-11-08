@@ -20,9 +20,12 @@ export default async function ActivityPage({
   const viewer = await requireOnboardedViewer();
   const params = await searchParams;
   const beforeParam = typeof params.before === "string" ? Number(params.before) : Number.NaN;
-  const before = Number.isFinite(beforeParam) ? new Date(beforeParam) : undefined;
+  const before =
+    Number.isFinite(beforeParam) && typeof params.id === "string"
+      ? { createdAt: new Date(beforeParam), id: params.id }
+      : undefined;
   const feed = await getFeed(getDb(), viewer, { limit: PAGE_SIZE, before });
-  const last = feed.items.at(-1)?.activity.createdAt;
+  const last = feed.items.at(-1)?.activity;
 
   return (
     <div className="flex flex-col gap-6">
@@ -36,7 +39,7 @@ export default async function ActivityPage({
           {feed.items.length === PAGE_SIZE && last ? (
             <div>
               <Button asChild variant="outline">
-                <Link href={`/activity?before=${last.getTime()}`}>Show older activity</Link>
+                <Link href={`/activity?before=${last.createdAt.getTime()}&id=${last.id}`}>Show older activity</Link>
               </Button>
             </div>
           ) : null}

@@ -130,11 +130,10 @@ export function toDecimalString(minor: number, currencyCode: string): string {
 
 const formatters = new Map<string, Intl.NumberFormat>();
 
-function formatter(currencyCode: string, locale: string): Intl.NumberFormat {
-  const key = `${locale}:${currencyCode}`;
+function formatter(currencyCode: string, locale: string, decimals: number): Intl.NumberFormat {
+  const key = `${locale}:${currencyCode}:${decimals}`;
   let cached = formatters.get(key);
   if (!cached) {
-    const decimals = currencyDecimals(currencyCode);
     cached = new Intl.NumberFormat(locale, {
       style: "currency",
       currency: currencyCode,
@@ -146,10 +145,15 @@ function formatter(currencyCode: string, locale: string): Intl.NumberFormat {
   return cached;
 }
 
-/** "₹1,250.50". Uses the absolute value; callers word the direction. */
+/**
+ * "₹1,250.50", or "₹1,250" when there is nothing after the point. Uses the
+ * absolute value; callers word the direction.
+ */
 export function formatMoney(minor: number, currencyCode: string, locale = "en-IN"): string {
   const decimals = currencyDecimals(currencyCode);
-  return formatter(currencyCode, locale).format(Math.abs(minor) / 10 ** decimals);
+  const factor = 10 ** decimals;
+  const value = Math.abs(minor);
+  return formatter(currencyCode, locale, value % factor === 0 ? 0 : decimals).format(value / factor);
 }
 
 /** A map of currency code to amount, the shape every balance takes. */

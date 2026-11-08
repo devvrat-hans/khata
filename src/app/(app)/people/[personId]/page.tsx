@@ -1,9 +1,9 @@
-import { Badge, Button, EmptyState } from "@aback-ui/ui";
-import { IconCash, IconLock, IconPlus, IconUsersGroup } from "@tabler/icons-react";
+import { Button, EmptyState } from "@aback-ui/ui";
+import { IconCash, IconLock, IconPlus } from "@tabler/icons-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BalanceText } from "@/components/money";
+import { BalanceHeadline } from "@/components/money";
 import { PageTitle, SectionTitle } from "@/components/page-title";
 import { ReminderButton } from "@/components/people/reminder-button";
 import { PersonAvatar } from "@/components/person-avatar";
@@ -51,13 +51,13 @@ export default async function PersonPage({ params }: { params: Promise<{ personI
         }
         actions={
           <>
-            <Button asChild variant="brand">
+            <Button asChild variant="brand" className="flex-1 sm:flex-none">
               <Link href={`/expenses/new?person=${person.id}`}>
                 <IconPlus aria-hidden="true" />
                 Add expense
               </Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="flex-1 sm:flex-none">
               <Link href={`/settle?person=${person.id}`}>
                 <IconCash aria-hidden="true" />
                 Settle up
@@ -67,47 +67,22 @@ export default async function PersonPage({ params }: { params: Promise<{ personI
         }
       />
 
-      <section aria-label="Balance" className="border border-border bg-card p-4 shadow-sm">
-        <p className="text-sm text-muted-foreground">Overall</p>
-        <p className="mt-0.5 text-xl font-bold tracking-tight">
-          <BalanceText balance={balance.total} subject={first} settledLabel={`You and ${first} are settled up`} />
-        </p>
-        {balance.parts.length > 0 ? (
-          <ul className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-sm">
-            {balance.parts.map((part) => {
-              const label =
-                part.source.kind === "direct"
-                  ? "One to one"
-                  : part.source.kind === "private"
-                    ? `Private in ${page.groupNames[part.source.groupId] ?? "a group"}`
-                    : (page.groupNames[part.source.groupId] ?? "A group");
-              const href = part.source.kind === "direct" ? null : `/groups/${part.source.groupId}`;
-              return (
-                <li key={`${part.source.kind}-${"groupId" in part.source ? part.source.groupId : ""}`} className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-                    {part.source.kind === "private" ? <IconLock aria-hidden="true" className="size-3.5" /> : null}
-                    {part.source.kind === "group" ? <IconUsersGroup aria-hidden="true" className="size-3.5" /> : null}
-                    {href ? (
-                      <Link href={href} className="hover:text-foreground hover:underline">
-                        {label}
-                      </Link>
-                    ) : (
-                      label
-                    )}
-                  </span>
-                  <BalanceText balance={part.amount} subject={first} className="text-sm" />
-                </li>
-              );
-            })}
-          </ul>
-        ) : null}
+      <section aria-label="Balance" className="border border-border bg-card">
+        <div className="p-5 sm:p-6">
+          <BalanceHeadline
+            balance={balance.total}
+            owedLabel={`${first} owes you`}
+            owesLabel={`You owe ${first}`}
+            settledLabel={`You and ${first} are settled up`}
+          />
+        </div>
         {owesViewer ? (
-          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border px-5 py-3 sm:px-6">
             <ReminderButton
               personId={person.id}
               disabledReason={page.remindedAt ? "You can send one reminder a day." : undefined}
             />
-            <span className="text-xs text-muted-foreground">
+            <span className="text-sm text-muted-foreground">
               {page.remindedAt
                 ? "You reminded them today. You can send another tomorrow."
                 : `${first} gets a friendly email${viewer.upiId ? " with your UPI ID" : ""}.`}
@@ -118,7 +93,7 @@ export default async function PersonPage({ params }: { params: Promise<{ personI
 
       {suggestions.length > 0 ? (
         <section aria-labelledby="settle-heading">
-          <SectionTitle id="settle-heading" title="Settle up" />
+          <SectionTitle id="settle-heading" title="Open balances" />
           <SuggestionList suggestions={suggestions} people={page.people} />
         </section>
       ) : null}
@@ -160,7 +135,7 @@ export default async function PersonPage({ params }: { params: Promise<{ personI
             ))}
           </ul>
           <p className="mt-3 text-sm text-muted-foreground">
-            Want something private inside one of these groups?{" "}
+            Something private inside one of these groups?{" "}
             {page.sharedGroups[0] ? (
               <Link
                 href={`/expenses/new?group=${page.sharedGroups[0].id}&with=${person.id}`}
@@ -168,11 +143,7 @@ export default async function PersonPage({ params }: { params: Promise<{ personI
               >
                 Add a private expense
               </Link>
-            ) : null}{" "}
-            <Badge variant="brand" className="ml-1 gap-1">
-              <IconLock aria-hidden="true" className="size-3" />
-              Hidden from the group
-            </Badge>
+            ) : null}
           </p>
         </section>
       ) : null}

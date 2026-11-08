@@ -5,7 +5,7 @@
   "description": "Khata: split shared expenses with groups and friends, keep private hisabs between two people, and settle up. Runs on Cloudflare Workers and D1.",
   "license": "MIT",
   "author": "Aback Group",
-  "homepage": "https://khata.aback.ai",
+  "homepage": "https://khata.aback.group",
   "type": "module",
   "engines": {
     "node": ">=20.9.0"

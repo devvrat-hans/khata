@@ -71,7 +71,10 @@ export async function listConnectedPeople(db: Database, viewerId: string): Promi
   const ids = new Set<string>();
   for (const row of friendRows) ids.add(row.userA === viewerId ? row.userB : row.userA);
   for (const row of memberRows) ids.add(row.userId);
-  return getPeople(db, [...ids]);
+  const people = await getPeople(db, [...ids]);
+  // Deleting an account needs every balance settled, so there is nothing left to show.
+  for (const [id, person] of people) if (person.deleted) people.delete(id);
+  return people;
 }
 
 /** A person the viewer is connected to, or "not found". */

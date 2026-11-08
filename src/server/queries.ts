@@ -42,6 +42,7 @@ function viewerAsPerson(viewer: Viewer): PersonSummary {
     email: viewer.email,
     image: viewer.image,
     joined: true,
+    deleted: false,
     upiId: viewer.upiId,
   };
 }

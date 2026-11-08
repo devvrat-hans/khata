@@ -164,7 +164,7 @@ export function ActivityList({
         const isPrivate = item.activity.visibility === "pair" && item.activity.groupId !== null;
         const content = (
           <>
-            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center border border-border bg-background text-primary-600 dark:text-primary-400">
+            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center bg-muted text-muted-foreground">
               <Icon aria-hidden="true" className="size-4" />
             </span>
             <span className="min-w-0 flex-1">
@@ -186,7 +186,7 @@ export function ActivityList({
             {href ? (
               <Link
                 href={href}
-                className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none"
+                className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring"
               >
                 {content}
               </Link>

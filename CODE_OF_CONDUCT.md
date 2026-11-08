@@ -18,6 +18,6 @@ Khata is built in the open, and everyone who takes part (in issues, pull request
 
 ## Enforcement
 
-Report problems to **support@aback.ai**. Reports are handled privately. Maintainers may remove comments, close issues, or ban people from the project for behaviour they consider harmful.
+Report problems to **hi@aback.group**. Reports are handled privately. Maintainers may remove comments, close issues, or ban people from the project for behaviour they consider harmful.
 
 This code of conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1.

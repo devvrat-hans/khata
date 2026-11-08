@@ -47,7 +47,7 @@ export default async function EditExpensePage({ params }: { params: Promise<{ ex
   }
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <PageTitle
         eyebrow={
           <Link href={`/expenses/${record.id}`} className="hover:text-foreground">
@@ -56,7 +56,7 @@ export default async function EditExpensePage({ params }: { params: Promise<{ ex
         }
         title="Edit expense"
       />
-      <div className="border border-border bg-card p-5 shadow-sm sm:p-6">
+      <div>
         <ExpenseForm
           viewer={me}
           context={context}

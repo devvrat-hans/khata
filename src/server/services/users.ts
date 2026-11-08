@@ -19,6 +19,8 @@ export interface PersonSummary {
   image: string | null;
   /** False until the person signs in for the first time. */
   joined: boolean;
+  /** The account was deleted. Kept only so old expenses can still name it. */
+  deleted: boolean;
   upiId: string | null;
 }
 
@@ -52,6 +54,7 @@ export function toPersonSummary(row: User): PersonSummary {
     email: deleted ? "" : row.email,
     image: deleted ? null : row.image,
     joined: row.emailVerified && !deleted,
+    deleted,
     upiId: deleted ? null : row.upiId,
   };
 }
