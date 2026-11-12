@@ -16,13 +16,7 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { PersonAvatar } from "../person-avatar";
 
-export function UserMenu({
-  user,
-  compact = false,
-}: {
-  user: { name: string; email: string; image: string | null };
-  compact?: boolean;
-}) {
+export function UserMenu({ user }: { user: { name: string; email: string; image: string | null } }) {
   const router = useRouter();
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -42,22 +36,10 @@ export function UserMenu({
         <button
           type="button"
           aria-label={`Account menu for ${user.name}`}
-          className={
-            compact
-              ? "flex items-center p-1 outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-focus-ring"
-              : "flex w-full items-center gap-2.5 p-1.5 text-left outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-focus-ring"
-          }
+          className="flex items-center gap-1.5 p-1 outline-none transition-colors duration-200 hover:bg-muted focus-visible:ring-2 focus-visible:ring-focus-ring"
         >
           <PersonAvatar person={user} size="sm" />
-          {compact ? null : (
-            <>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium text-foreground">{user.name}</span>
-                <span className="block truncate text-xs text-muted-foreground">{user.email}</span>
-              </span>
-              <IconChevronDown aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-            </>
-          )}
+          <IconChevronDown aria-hidden="true" className="hidden size-4 shrink-0 text-muted-foreground md:block" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-60">

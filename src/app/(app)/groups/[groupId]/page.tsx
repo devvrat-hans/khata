@@ -1,14 +1,16 @@
-import { Badge, Button, EmptyState } from "@aback-ui/ui";
-import { IconCash, IconDownload, IconLock, IconPlus, IconReceipt, IconSettings } from "@tabler/icons-react";
+import { Button } from "@aback-ui/ui";
+import { IconDownload, IconLock, IconPlus, IconSettings } from "@tabler/icons-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLink, StatusMark } from "@/components/editorial";
 import { DebtsPanel } from "@/components/groups/debts-panel";
 import { BalanceBadge, BalanceHeadline, BalanceText, MoneyList } from "@/components/money";
-import { PageTitle, SectionTitle } from "@/components/page-title";
+import { EmptyPanel, PageTitle, SectionTitle } from "@/components/page-title";
+import { Stat, StatStrip } from "@/components/stats";
 import { PersonAvatar } from "@/components/person-avatar";
 import { RecordsList } from "@/components/records-list";
-import { addTo, isZero, type MoneyByCurrency } from "@/domain/money";
+import { addTo, type MoneyByCurrency } from "@/domain/money";
 import { firstName } from "@/lib/format";
 import { GROUP_KIND_LABELS } from "@/lib/labels";
 import { getViewer, requireOnboardedViewer } from "@/server/auth/session";
@@ -39,38 +41,38 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
   const { viewer, page } = await load(groupId);
   const { group, members, people } = page;
 
+  // Shared spending only: private hisabs never count toward the group.
   const total: MoneyByCurrency = {};
+  const yourShare: MoneyByCurrency = {};
+  let expenseCount = 0;
   for (const record of page.records) {
-    if (record.kind === "expense" && record.visibility === "group") addTo(total, record.currency, record.amount);
+    if (record.kind !== "expense" || record.visibility !== "group") continue;
+    expenseCount += 1;
+    addTo(total, record.currency, record.amount);
+    const share = record.shares.find((portion) => portion.userId === viewer.id)?.amount ?? 0;
+    if (share !== 0) addTo(yourShare, record.currency, share);
   }
   const hasDebts = Object.values(page.debts).some((list) => list.length > 0);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-12 md:gap-16">
       <PageTitle
         eyebrow={
-          <span className="inline-flex items-center gap-2">
-            {GROUP_KIND_LABELS[group.kind]}
-            <span aria-hidden="true">·</span>
-            {members.length} {members.length === 1 ? "person" : "people"}
-          </span>
+          <>
+            {GROUP_KIND_LABELS[group.kind]} · {members.length} {members.length === 1 ? "person" : "people"}
+          </>
         }
-        title={<span className="min-w-0 break-words">{group.name}</span>}
+        title={group.name}
         actions={
           <>
-            <Button asChild variant="brand" className="flex-1 sm:flex-none">
+            <Button asChild variant="brand" size="lg" className="flex-1 sm:flex-none">
               <Link href={`/expenses/new?group=${group.id}`}>
                 <IconPlus aria-hidden="true" />
                 Add expense
               </Link>
             </Button>
-            <Button asChild variant="outline" className="flex-1 sm:flex-none">
-              <Link href={`/settle?group=${group.id}`}>
-                <IconCash aria-hidden="true" />
-                Settle up
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="icon" aria-label="Group settings">
+            <ArrowLink href={`/settle?group=${group.id}`}>Settle up</ArrowLink>
+            <Button asChild variant="ghost" size="icon" aria-label="Group settings" title="Group settings">
               <Link href={`/groups/${group.id}/settings`}>
                 <IconSettings aria-hidden="true" />
               </Link>
@@ -79,23 +81,24 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
         }
       />
 
-      <section
-        aria-label="Your balance"
-        className="flex flex-col gap-4 border border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
-      >
+      <section aria-label="Your balance" className="flex flex-col gap-10">
         <BalanceHeadline balance={page.viewerBalance.shared} settledLabel="You are settled up in this group" />
-        {!isZero(total) ? (
-          <div className="text-sm text-muted-foreground sm:text-right">
-            Group spending
-            <MoneyList money={total} className="mt-0.5 block text-base font-semibold text-foreground" />
-          </div>
-        ) : null}
+        <StatStrip>
+          <Stat label="Group spending">
+            <MoneyList money={total} />
+          </Stat>
+          <Stat label="Your share">
+            <MoneyList money={yourShare} />
+          </Stat>
+          <Stat label="Expenses">{expenseCount}</Stat>
+          <Stat label="Members">{members.length}</Stat>
+        </StatStrip>
       </section>
 
       {/* Source order is the phone order: who owes whom, then expenses, then the rest. */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_auto_1fr]">
+      <div className="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:grid-rows-[auto_auto_1fr] lg:gap-x-12">
         {hasDebts ? (
-          <div className="lg:col-start-2 lg:row-start-1">
+          <div className="lg:col-span-4 lg:col-start-9 lg:row-start-1">
             <DebtsPanel
               groupId={group.id}
               debts={page.debts}
@@ -106,41 +109,43 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
           </div>
         ) : null}
 
-        <section aria-labelledby="expenses-heading" className="min-w-0 lg:col-start-1 lg:row-span-3 lg:row-start-1">
+        <section aria-labelledby="expenses-heading" className="min-w-0 lg:col-span-8 lg:col-start-1 lg:row-span-3 lg:row-start-1">
           <SectionTitle
             id="expenses-heading"
             title="Expenses"
+            count={page.records.length}
             action={
               page.records.length > 0 ? (
-                <Button asChild variant="ghost" size="sm">
-                  <a href={`/api/groups/${group.id}/export`} download>
-                    <IconDownload aria-hidden="true" />
-                    Export CSV
-                  </a>
-                </Button>
+                <a
+                  href={`/api/groups/${group.id}/export`}
+                  download
+                  className="inline-flex items-center gap-1.5 border-b border-separator pb-0.5 text-sm font-medium transition-colors duration-200 outline-none hover:border-foreground focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  <IconDownload aria-hidden="true" className="size-3.5" />
+                  Export CSV
+                </a>
               ) : null
             }
           />
           {page.records.length > 0 ? (
             <RecordsList records={page.records} people={people} viewerId={viewer.id} />
           ) : (
-            <EmptyState
-              icon={<IconReceipt aria-hidden="true" />}
-              title="No expenses yet"
+            <EmptyPanel
+              title="No expenses yet."
               description="Add the first one. Split it equally, by exact amounts, by percentages or by shares."
               action={
-                <Button asChild variant="brand">
+                <Button asChild variant="brand" size="lg">
                   <Link href={`/expenses/new?group=${group.id}`}>Add an expense</Link>
                 </Button>
               }
             />
           )}
           {members.length > 1 ? (
-            <p className="mt-3 flex items-start gap-1.5 text-sm text-muted-foreground">
-              <IconLock aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+            <p className="mt-6 flex items-start gap-2 text-sm leading-relaxed text-muted-foreground">
+              <IconLock aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary-700 dark:text-primary-400" />
               <span>
                 Something just between two of you?{" "}
-                <Link href={`/expenses/new?group=${group.id}&private=1`} className="text-link hover:underline">
+                <Link href={`/expenses/new?group=${group.id}&private=1`} className="link-inline font-medium text-foreground">
                   Add a private expense
                 </Link>
                 . The rest of the group never sees it.
@@ -150,24 +155,24 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
         </section>
 
         {page.privateBalances.length > 0 ? (
-          <section
-            aria-labelledby="private-heading"
-            className="border border-primary-200 bg-primary-50/40 lg:col-start-2 dark:border-primary-800/60 dark:bg-primary-950/30"
-          >
-            <h2 id="private-heading" className="flex items-center gap-2 px-4 pt-3 text-base font-semibold">
-              <IconLock aria-hidden="true" className="size-4 text-primary-600 dark:text-primary-400" />
-              Your private hisabs
-            </h2>
-            <ul className="py-1">
+          <section aria-labelledby="private-heading" className="lg:col-span-4 lg:col-start-9">
+            <SectionTitle
+              id="private-heading"
+              title={
+                <span className="inline-flex items-center gap-2">
+                  <IconLock aria-hidden="true" className="size-4 text-primary-700 dark:text-primary-400" />
+                  Private hisabs
+                </span>
+              }
+              count={page.privateBalances.length}
+            />
+            <ul className="border-t border-border">
               {page.privateBalances.map(({ userId, amount }) => {
                 const person = people[userId];
                 if (!person) return null;
                 return (
-                  <li key={userId}>
-                    <Link
-                      href={`/people/${userId}`}
-                      className="flex items-center gap-3 px-4 py-2 hover:bg-primary-50 dark:hover:bg-primary-950/50"
-                    >
+                  <li key={userId} className="border-b border-border">
+                    <Link href={`/people/${userId}`} className="row-link -mx-3 flex items-center gap-3 px-3 py-3.5">
                       <PersonAvatar person={person} size="sm" />
                       <span className="min-w-0 flex-1 text-sm">
                         <BalanceText balance={amount} subject={firstName(person.name)} />
@@ -177,27 +182,28 @@ export default async function GroupPage({ params }: { params: Promise<{ groupId:
                 );
               })}
             </ul>
+            <p className="pt-3 text-xs leading-relaxed text-muted-foreground">
+              Only you and the other person can see these.
+            </p>
           </section>
         ) : null}
 
-        <section aria-labelledby="members-heading" className="border border-border bg-card lg:col-start-2">
-          <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-1">
-            <h2 id="members-heading" className="text-base font-semibold">
-              Members
-            </h2>
-            <Button asChild variant="ghost" size="sm">
-              <Link href={`/groups/${group.id}/settings#members`}>Manage</Link>
-            </Button>
-          </div>
-          <ul className="pb-2">
+        <section aria-labelledby="members-heading" className="lg:col-span-4 lg:col-start-9">
+          <SectionTitle
+            id="members-heading"
+            title="Members"
+            count={members.length}
+            action={<ArrowLink href={`/groups/${group.id}/settings#members`}>Manage</ArrowLink>}
+          />
+          <ul className="border-t border-border">
             {members.map((member) => {
               const net = page.netByUser[member.id] ?? {};
               return (
-                <li key={member.id} className="flex items-center gap-3 px-4 py-2">
+                <li key={member.id} className="flex items-center gap-3 border-b border-border py-3.5">
                   <PersonAvatar person={member} size="sm" />
-                  <span className="flex min-w-0 flex-1 items-center gap-1.5 text-sm font-medium">
-                    <span className="truncate">{member.id === viewer.id ? "You" : member.name}</span>
-                    {!member.joined ? <Badge variant="warning">Invited</Badge> : null}
+                  <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="truncate text-sm font-medium">{member.id === viewer.id ? "You" : member.name}</span>
+                    {!member.joined ? <StatusMark tone="warning">Invited</StatusMark> : null}
                   </span>
                   <BalanceBadge balance={net} owedLabel="gets back" owesLabel="owes" />
                 </li>

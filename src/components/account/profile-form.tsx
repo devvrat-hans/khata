@@ -53,7 +53,7 @@ export function ProfileForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
+    <form onSubmit={submit} className="flex flex-col gap-6" noValidate>
       <Field htmlFor={`${id}-name`} label="Your name" description="This is how people see you in groups and emails.">
         <Input
           id={`${id}-name`}
@@ -62,6 +62,7 @@ export function ProfileForm({
           onChange={(event) => update("name", event.target.value)}
           maxLength={60}
           required
+          className="h-11"
         />
       </Field>
       <Field
@@ -73,6 +74,7 @@ export function ProfileForm({
           id={`${id}-currency`}
           value={values.defaultCurrency}
           onChange={(event) => update("defaultCurrency", event.target.value)}
+          className="h-11"
         />
       </Field>
       <Field
@@ -88,9 +90,10 @@ export function ProfileForm({
           spellCheck={false}
           value={values.upiId}
           onChange={(event) => update("upiId", event.target.value)}
+          className="h-11"
         />
       </Field>
-      <div className="flex items-start justify-between gap-4 border border-border bg-muted/20 p-4">
+      <div className="flex items-start justify-between gap-6 border-y border-border py-4">
         <div>
           <label htmlFor={`${id}-notify`} className="text-sm font-medium">
             Email me about new expenses and payments
@@ -106,7 +109,7 @@ export function ProfileForm({
         />
       </div>
       {error ? (
-        <p role="alert" className="border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+        <p role="alert" className="border-l-2 border-danger bg-danger-soft px-3 py-2 text-sm text-danger-strong">
           {error}
         </p>
       ) : null}

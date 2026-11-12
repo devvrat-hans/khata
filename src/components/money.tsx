@@ -88,14 +88,14 @@ export function BalanceText({
       {hasPositive ? (
         <span className={toneClass.owed}>
           {subject ? `${subject} owes you ` : "You are owed "}
-          <MoneyList money={positive} className="font-semibold" />
+          <MoneyList money={positive} className="font-medium" />
         </span>
       ) : null}
       {hasPositive && hasNegative ? <span className="text-muted-foreground">and</span> : null}
       {hasNegative ? (
         <span className={toneClass.owes}>
           {hasPositive ? "you" : "You"} owe {subject ? `${subject} ` : ""}
-          <MoneyList money={negative} className="font-semibold" />
+          <MoneyList money={negative} className="font-medium" />
         </span>
       ) : null}
     </span>
@@ -105,8 +105,11 @@ export function BalanceText({
 function Figure({ label, money, tone }: { label: string; money: MoneyByCurrency; tone: "owed" | "owes" }) {
   return (
     <div className="min-w-0">
-      <p className={cn("text-sm font-medium", toneClass[tone])}>{label}</p>
-      <p className={cn("mt-0.5 text-3xl font-extrabold tracking-tight break-words sm:text-4xl", toneClass[tone])}>
+      <p className="flex items-center gap-2 text-[0.9375rem] font-medium text-muted-foreground">
+        <span aria-hidden="true" className={cn("size-2 shrink-0", tone === "owed" ? "bg-success" : "bg-danger")} />
+        {label}
+      </p>
+      <p className={cn("type-figure mt-3 break-words", toneClass[tone])}>
         <MoneyList money={money} />
       </p>
     </div>
@@ -128,9 +131,19 @@ export function BalanceHeadline({
   const { owed, owes } = splitDirections(balance);
   const hasOwed = Object.keys(owed).length > 0;
   const hasOwes = Object.keys(owes).length > 0;
-  if (!hasOwed && !hasOwes) return <p className="text-2xl font-bold tracking-tight text-muted-foreground">{settledLabel}</p>;
+  if (!hasOwed && !hasOwes) {
+    return (
+      <div className="min-w-0">
+        <p className="flex items-center gap-2 text-[0.9375rem] font-medium text-muted-foreground">
+          <span aria-hidden="true" className="size-2 shrink-0 border border-muted-foreground" />
+          Balance
+        </p>
+        <p className="type-headline mt-3 text-foreground">{settledLabel}</p>
+      </div>
+    );
+  }
   return (
-    <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:gap-10">
+    <div className="flex min-w-0 flex-col gap-8 sm:flex-row sm:gap-14">
       {hasOwed ? <Figure label={owedLabel} money={owed} tone="owed" /> : null}
       {hasOwes ? <Figure label={owesLabel} money={owes} tone="owes" /> : null}
     </div>
@@ -160,17 +173,17 @@ export function BalanceBadge({
     return <span className={cn("shrink-0 text-sm text-muted-foreground", className)}>settled up</span>;
   }
   return (
-    <span className={cn("flex shrink-0 flex-col items-end gap-0.5 text-right", className)}>
+    <span className={cn("flex shrink-0 flex-col items-end gap-1 text-right", className)}>
       {Object.keys(positive).length > 0 ? (
-        <span className="flex flex-col items-end">
-          <span className="text-xs text-success">{owedLabel}</span>
-          <MoneyList money={positive} className="text-base font-semibold text-success" />
+        <span className="flex flex-col items-end gap-0.5">
+          <span className="type-meta text-success">{owedLabel}</span>
+          <MoneyList money={positive} className="text-base font-medium tracking-[-0.01em] text-success" />
         </span>
       ) : null}
       {Object.keys(negative).length > 0 ? (
-        <span className="flex flex-col items-end">
-          <span className="text-xs text-danger">{owesLabel}</span>
-          <MoneyList money={negative} className="text-base font-semibold text-danger" />
+        <span className="flex flex-col items-end gap-0.5">
+          <span className="type-meta text-danger">{owesLabel}</span>
+          <MoneyList money={negative} className="text-base font-medium tracking-[-0.01em] text-danger" />
         </span>
       ) : null}
     </span>

@@ -16,9 +16,13 @@ export default async function NewGroupPage() {
     .map(({ id, name, email, image }) => ({ id, name, email, image }));
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-      <PageTitle title="New group" description="Name it, pick a currency, and add the people you share costs with." />
-      <div className="border border-border bg-card p-5 sm:p-6">
+    <div className="flex flex-col gap-12 md:gap-16">
+      <PageTitle
+        eyebrow="New group"
+        title="Start a shared ledger"
+        description="Name it, pick a currency, and add the people you share costs with. They do not need an account first."
+      />
+      <div className="max-w-2xl">
         <GroupForm contacts={contacts} defaultCurrency={viewer.defaultCurrency} />
       </div>
     </div>

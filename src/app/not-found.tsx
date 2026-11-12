@@ -1,30 +1,27 @@
 import { Button } from "@aback-ui/ui";
 import Link from "next/link";
-import { Logo } from "@/components/logo";
+import { ArrowLink, SectionLabel } from "@/components/editorial";
+import { BareHeader } from "@/components/site-chrome";
 
 export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="flex h-16 items-center border-b border-separator px-4 md:px-6">
-        <Logo />
-      </header>
-      <main id="main-content" className="flex flex-1 items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md border border-primary-200 bg-gradient-to-br from-primary-50 via-background to-primary-100/60 p-8 dark:border-primary-800/60 dark:from-primary-950/40 dark:to-background">
-          <p className="inline-block border border-primary-200 bg-background px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-primary-700 dark:border-primary-800 dark:text-primary-300">
-            Error 404
-          </p>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight">Page not found</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            This page does not exist, or you do not have access to it. Private hisabs and groups only open for the people
-            in them.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            <Button asChild variant="brand">
-              <Link href="/dashboard">Go to your home page</Link>
-            </Button>
-            <Button asChild variant="ghost">
-              <Link href="/">About Khata</Link>
-            </Button>
+      <BareHeader />
+      <main id="main-content" className="flex flex-1 flex-col">
+        <div className="container-site flex flex-1 flex-col justify-center py-16 md:py-24">
+          <SectionLabel>Error 404</SectionLabel>
+          <h1 className="type-display mt-8 max-w-[12ch] text-balance md:mt-12">Nothing on this page.</h1>
+          <div className="mt-10 grid gap-8 md:mt-14 lg:grid-cols-12 lg:items-end lg:gap-x-10">
+            <p className="type-lede max-w-xl text-muted-foreground lg:col-span-7">
+              This page does not exist, or you do not have access to it. Private hisabs and groups only open for the
+              people in them.
+            </p>
+            <div className="flex flex-wrap items-center gap-x-7 gap-y-4 lg:col-span-5 lg:justify-end">
+              <Button asChild variant="brand" size="lg" className="h-12 px-6">
+                <Link href="/dashboard">Go to your home page</Link>
+              </Button>
+              <ArrowLink href="/">About Khata</ArrowLink>
+            </div>
           </div>
         </div>
       </main>

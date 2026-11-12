@@ -13,7 +13,9 @@ export function DeleteExpenseButton({ expenseId, description }: { expenseId: str
           Delete
         </>
       }
-      triggerClassName="text-destructive hover:text-destructive"
+      triggerVariant="ghost"
+      triggerSize="lg"
+      triggerClassName="text-destructive hover:bg-danger-soft hover:text-destructive"
       title={`Delete "${description}"?`}
       description={
         <p>

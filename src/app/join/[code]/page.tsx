@@ -1,9 +1,8 @@
-import { Button } from "@aback-ui/ui";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { GROUP_KIND_ICONS, IconChip } from "@/components/icons";
-import { Logo } from "@/components/logo";
+import { ArrowLink, SectionLabel } from "@/components/editorial";
+import { BareHeader } from "@/components/site-chrome";
+import { GROUP_KIND_LABELS } from "@/lib/labels";
 import { requireViewer } from "@/server/auth/session";
 import { getDb } from "@/server/db/client";
 import { AppError } from "@/server/errors";
@@ -26,37 +25,41 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
   if (preview?.alreadyMember) redirect(`/groups/${preview.group.id}`);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-muted/30">
-      <header className="flex h-16 items-center border-b border-separator bg-background px-4 md:px-6">
-        <Logo href="/dashboard" />
-      </header>
-      <main id="main-content" className="flex flex-1 items-start justify-center px-4 py-10 sm:items-center">
-        <div className="w-full max-w-sm border border-border bg-card p-6 shadow-sm sm:p-8">
+    <div className="flex min-h-dvh flex-col">
+      <BareHeader href="/dashboard" />
+      <main id="main-content" className="flex-1">
+        <div className="container-site py-14 md:py-24">
           {preview ? (
-            <>
-              <IconChip icon={GROUP_KIND_ICONS[preview.group.kind]} size="lg" />
-              <h1 className="mt-4 text-2xl font-bold tracking-tight">Join “{preview.group.name}”</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {preview.memberCount} {preview.memberCount === 1 ? "person is" : "people are"} splitting expenses in
-                this group. Once you join, you can see its expenses and add your own.
-              </p>
-              <div className="mt-6">
-                <JoinButton code={code} />
+            <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
+              <div className="lg:col-span-7">
+                <SectionLabel>
+                  {GROUP_KIND_LABELS[preview.group.kind]} · {preview.memberCount}{" "}
+                  {preview.memberCount === 1 ? "person" : "people"}
+                </SectionLabel>
+                <h1 className="type-title mt-8 text-balance break-words md:mt-10">Join {preview.group.name}.</h1>
+                <p className="type-lede mt-6 max-w-lg text-muted-foreground">
+                  {preview.memberCount} {preview.memberCount === 1 ? "person is" : "people are"} splitting expenses in
+                  this group. Once you join, you can see its expenses and add your own.
+                </p>
               </div>
-            </>
+              <div className="lg:col-span-4 lg:col-start-9 lg:self-end">
+                <div className="border-t border-foreground pt-6">
+                  <JoinButton code={code} />
+                </div>
+              </div>
+            </div>
           ) : (
-            <>
-              <h1 className="text-2xl font-bold tracking-tight">This link does not work</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
+            <div className="max-w-2xl">
+              <SectionLabel>Join link</SectionLabel>
+              <h1 className="type-title mt-8 text-balance md:mt-10">This link does not work.</h1>
+              <p className="type-lede mt-6 text-muted-foreground">
                 The group may have been deleted, or its owner reset the join link. Ask someone in the group for a new
                 link.
               </p>
-              <div className="mt-6">
-                <Button asChild variant="outline">
-                  <Link href="/dashboard">Go to your home page</Link>
-                </Button>
+              <div className="mt-10">
+                <ArrowLink href="/dashboard">Go to your home page</ArrowLink>
               </div>
-            </>
+            </div>
           )}
         </div>
       </main>

@@ -104,26 +104,38 @@ export function SettleForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-6" noValidate>
-      <div className="grid grid-cols-[minmax(0,1fr)_8.5rem] gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
-        <Field htmlFor={`${id}-amount`} label="Amount" required>
+    <form onSubmit={submit} className="flex flex-col gap-8" noValidate>
+      <div className="flex flex-col gap-2">
+        <label htmlFor={`${id}-amount`} className="type-meta text-muted-foreground">
+          Amount
+        </label>
+        <div className="flex items-end gap-4">
           <Input
             id={`${id}-amount`}
             inputMode="decimal"
             placeholder="0"
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
-            className="h-14 text-3xl font-bold tabular-nums"
+            required
+            autoFocus={!initial.amount}
+            className="h-auto min-w-0 flex-1 border-0 border-b border-separator bg-transparent px-0 py-1 text-5xl font-medium tracking-[-0.045em] tabular-nums shadow-none transition-colors duration-200 focus-visible:border-foreground focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-6xl"
           />
-        </Field>
-        <Field htmlFor={`${id}-currency`} label="Currency">
-          <CurrencySelect id={`${id}-currency`} value={currency} onChange={(event) => setCurrency(event.target.value)} className="h-14" />
-        </Field>
+          <div className="w-24 shrink-0 pb-1">
+            <CurrencySelect
+              compact
+              id={`${id}-currency`}
+              aria-label="Currency"
+              value={currency}
+              onChange={(event) => setCurrency(event.target.value)}
+              className="h-11 font-medium"
+            />
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2 sm:gap-3">
         <Field htmlFor={`${id}-from`} label="Who paid">
-          <Select id={`${id}-from`} value={from} onChange={(event) => setFrom(event.target.value)}>
+          <Select id={`${id}-from`} value={from} onChange={(event) => setFrom(event.target.value)} className="h-11">
             {people.map((person) => (
               <option key={person.id} value={person.id}>
                 {label(person.id)}
@@ -131,9 +143,9 @@ export function SettleForm({
             ))}
           </Select>
         </Field>
-        <IconArrowRight aria-hidden="true" className="mx-auto mb-2.5 size-5 text-muted-foreground" />
+        <IconArrowRight aria-hidden="true" className="mx-auto mb-3 size-5 text-muted-foreground" />
         <Field htmlFor={`${id}-to`} label="Who received">
-          <Select id={`${id}-to`} value={to} onChange={(event) => setTo(event.target.value)}>
+          <Select id={`${id}-to`} value={to} onChange={(event) => setTo(event.target.value)} className="h-11">
             {people.map((person) => (
               <option key={person.id} value={person.id}>
                 {label(person.id)}
@@ -144,23 +156,23 @@ export function SettleForm({
       </div>
 
       {upiUrl && receiver?.upiId ? (
-        <div className="flex flex-col gap-3 border border-primary-200 bg-primary-50/50 p-4 dark:border-primary-800/60 dark:bg-primary-950/30">
-          <p className="text-sm">
+        <div className="flex flex-col gap-4 border-l-2 border-primary-700 py-1 pl-5 dark:border-primary-400">
+          <p className="text-[0.9375rem] leading-relaxed">
             {receiver.name} accepts UPI at <span className="font-mono font-medium">{receiver.upiId}</span>. Pay first, then
             record the payment here.
           </p>
           <div className="flex flex-wrap gap-2">
-            <Button asChild variant="brand" size="sm">
+            <Button asChild variant="brand">
               <a href={upiUrl}>Pay {formatMoney(minor, currency)} with a UPI app</a>
             </Button>
-            <CopyButton value={receiver.upiId} label="Copy UPI ID" showLabel variant="outline" size="sm" />
+            <CopyButton value={receiver.upiId} label="Copy UPI ID" showLabel variant="outline" />
           </div>
           <p className="text-xs text-muted-foreground">The UPI button opens your payments app on a phone.</p>
         </div>
       ) : null}
 
       <div className="flex flex-col gap-2">
-        <span id={`${id}-method`} className="text-sm font-medium">
+        <span id={`${id}-method`} className="type-meta text-muted-foreground">
           Paid with
         </span>
         <div role="radiogroup" aria-labelledby={`${id}-method`} className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -172,10 +184,10 @@ export function SettleForm({
               aria-checked={method === value}
               onClick={() => setMethod(value)}
               className={cn(
-                "h-10 border px-2 text-sm leading-tight transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                "h-11 border px-2 text-sm leading-tight transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 method === value
-                  ? "border-primary-500 bg-primary-50 font-medium text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"
-                  : "border-border bg-background hover:bg-muted",
+                  ? "border-foreground bg-foreground font-medium text-background"
+                  : "border-separator bg-background hover:border-foreground",
               )}
             >
               {PAYMENT_METHOD_LABELS[value]}
@@ -186,26 +198,32 @@ export function SettleForm({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
         <Field htmlFor={`${id}-date`} label="Date">
-          <Input id={`${id}-date`} type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+          <Input id={`${id}-date`} type="date" value={date} onChange={(event) => setDate(event.target.value)} className="h-11" />
         </Field>
         <Field htmlFor={`${id}-note`} label="Note (optional)">
-          <Input id={`${id}-note`} maxLength={200} value={note} onChange={(event) => setNote(event.target.value)} />
+          <Input id={`${id}-note`} maxLength={200} value={note} onChange={(event) => setNote(event.target.value)} className="h-11" />
         </Field>
       </div>
 
       {context.kind === "group" && involvesViewer ? (
         <div
           className={cn(
-            "flex items-start justify-between gap-4 border p-4",
-            isPrivate ? "border-primary-300 bg-primary-50/60 dark:border-primary-800 dark:bg-primary-950/30" : "border-border bg-muted/20",
+            "flex items-start justify-between gap-6 border-l-2 py-1 pl-5 transition-colors duration-200",
+            isPrivate ? "border-primary-700 dark:border-primary-400" : "border-border",
           )}
         >
           <div>
-            <label htmlFor={`${id}-private`} className="flex items-center gap-1.5 text-sm font-medium">
-              <IconLock aria-hidden="true" className="size-4 text-primary-600 dark:text-primary-400" />
+            <label
+              htmlFor={`${id}-private`}
+              className={cn(
+                "flex items-center gap-2 text-base font-medium tracking-[-0.01em]",
+                isPrivate ? "text-primary-700 dark:text-primary-400" : "text-foreground",
+              )}
+            >
+              <IconLock aria-hidden="true" className="size-4" />
               Settles a private hisab
             </label>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">
               Turn on when this pays back something private between the two of you. The rest of the group will not see it.
             </p>
           </div>
@@ -214,17 +232,17 @@ export function SettleForm({
       ) : null}
 
       {error ? (
-        <p role="alert" className="border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+        <p role="alert" className="border-l-2 border-danger bg-danger-soft px-3 py-2 text-sm text-danger-strong">
           {error}
         </p>
       ) : null}
 
-      <div className="flex gap-2">
-        <Button type="submit" variant="brand" size="lg" disabled={pending} className="flex-1 sm:flex-none">
+      <div className="flex gap-2 border-t border-border pt-6">
+        <Button type="submit" variant="brand" size="lg" disabled={pending} className="h-12 flex-1 px-6 sm:flex-none">
           {pending ? <Spinner size="sm" /> : null}
           {pending ? "Recording…" : "Record payment"}
         </Button>
-        <Button type="button" variant="ghost" size="lg" onClick={() => router.push(cancelHref)}>
+        <Button type="button" variant="ghost" size="lg" onClick={() => router.push(cancelHref)} className="h-12">
           Cancel
         </Button>
       </div>

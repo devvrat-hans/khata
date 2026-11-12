@@ -36,13 +36,14 @@ export function GroupSettingsForm({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
+    <form onSubmit={submit} className="flex flex-col gap-6" noValidate>
       <Field htmlFor={`${id}-name`} label="Group name">
         <Input
           id={`${id}-name`}
           value={values.name}
           maxLength={60}
           onChange={(event) => setValues({ ...values, name: event.target.value })}
+          className="h-11"
         />
       </Field>
       <div className="flex flex-col gap-2">
@@ -56,9 +57,10 @@ export function GroupSettingsForm({
           id={`${id}-currency`}
           value={values.currency}
           onChange={(event) => setValues({ ...values, currency: event.target.value })}
+          className="h-11"
         />
       </Field>
-      <div className="flex items-start justify-between gap-4 border border-border bg-muted/20 p-4">
+      <div className="flex items-start justify-between gap-6 border-y border-border py-4">
         <div>
           <label htmlFor={`${id}-simplify`} className="text-sm font-medium">
             Simplify debts
@@ -75,7 +77,7 @@ export function GroupSettingsForm({
         />
       </div>
       {error ? (
-        <p role="alert" className="border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+        <p role="alert" className="border-l-2 border-danger bg-danger-soft px-3 py-2 text-sm text-danger-strong">
           {error}
         </p>
       ) : null}

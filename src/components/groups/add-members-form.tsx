@@ -65,7 +65,7 @@ export function AddMembersForm({ groupId, contacts }: { groupId: string; contact
         onChangeNew={setNewPeople}
       />
       {error ? (
-        <p role="alert" className="border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+        <p role="alert" className="border-l-2 border-danger bg-danger-soft px-3 py-2 text-sm text-danger-strong">
           {error}
         </p>
       ) : null}

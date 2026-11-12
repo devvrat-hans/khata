@@ -1,9 +1,7 @@
-import { EmptyState } from "@aback-ui/ui";
-import { IconCircleCheck } from "@tabler/icons-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PageTitle } from "@/components/page-title";
+import { EmptyPanel, PageTitle, SectionTitle } from "@/components/page-title";
 import { type SettlePerson, SettleForm } from "@/components/settle/settle-form";
 import { SuggestionList } from "@/components/settle/suggestion-list";
 import { isSupportedCurrency, toDecimalString } from "@/domain/money";
@@ -55,17 +53,17 @@ export default async function SettlePage({
     const to = one(params.to);
     const currency = requestedCurrency && isSupportedCurrency(requestedCurrency) ? requestedCurrency : group.currency;
     return (
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <div className="flex flex-col gap-12 md:gap-14">
         <PageTitle
           eyebrow={
-            <Link href={`/groups/${group.id}`} className="hover:text-foreground">
+            <Link href={`/groups/${group.id}`} className="link-inline">
               {group.name}
             </Link>
           }
           title="Record a payment"
           description="Pay back what you owe, or record money you received."
         />
-        <div className="border border-border bg-card p-5 sm:p-6">
+        <div className="max-w-2xl border-t border-foreground pt-8">
           <SettleForm
             viewer={asPerson(viewer)}
             context={{
@@ -104,17 +102,17 @@ export default async function SettlePage({
     const from = one(params.from);
     const to = one(params.to);
     return (
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <div className="flex flex-col gap-12 md:gap-14">
         <PageTitle
           eyebrow={
-            <Link href={`/people/${person.id}`} className="hover:text-foreground">
+            <Link href={`/people/${person.id}`} className="link-inline">
               You and {person.name}
             </Link>
           }
           title="Record a payment"
           description="This settles your one to one hisab. To settle a balance from a group, record it in that group."
         />
-        <div className="border border-border bg-card p-5 sm:p-6">
+        <div className="max-w-2xl border-t border-foreground pt-8">
           <SettleForm
             viewer={asPerson(viewer)}
             context={{
@@ -141,33 +139,33 @@ export default async function SettlePage({
   const owedToYou = suggestions.filter((suggestion) => suggestion.amount > 0);
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
+    <div className="flex flex-col gap-12 md:gap-16">
       <PageTitle
-        title="Settle up"
-        description="Every open balance, where it lives. Record a payment in the same place so every balance stays right."
+        eyebrow="Settle up"
+        title={suggestions.length === 0 ? "All square." : "Who to pay, who pays you"}
+        description="Every open balance, where it lives. Record a payment in the same place, so every balance stays right."
       />
       {suggestions.length === 0 ? (
-        <EmptyState
-          icon={<IconCircleCheck aria-hidden="true" />}
-          title="You are all settled up"
+        <EmptyPanel
+          title="You are all settled up."
           description="Nobody owes you and you owe nobody. Enjoy it."
         />
       ) : null}
-      {youOwe.length > 0 ? (
-        <section aria-labelledby="you-owe">
-          <h2 id="you-owe" className="mb-3 text-lg font-semibold">
-            You owe
-          </h2>
-          <SuggestionList suggestions={youOwe} people={overview.people} />
-        </section>
-      ) : null}
-      {owedToYou.length > 0 ? (
-        <section aria-labelledby="owed-to-you">
-          <h2 id="owed-to-you" className="mb-3 text-lg font-semibold">
-            Owed to you
-          </h2>
-          <SuggestionList suggestions={owedToYou} people={overview.people} />
-        </section>
+      {suggestions.length > 0 ? (
+        <div className="grid grid-cols-1 gap-14 lg:grid-cols-2 lg:gap-12">
+          {youOwe.length > 0 ? (
+            <section aria-labelledby="you-owe" className="min-w-0">
+              <SectionTitle id="you-owe" title="You owe" count={youOwe.length} />
+              <SuggestionList suggestions={youOwe} people={overview.people} />
+            </section>
+          ) : null}
+          {owedToYou.length > 0 ? (
+            <section aria-labelledby="owed-to-you" className="min-w-0">
+              <SectionTitle id="owed-to-you" title="Owed to you" count={owedToYou.length} />
+              <SuggestionList suggestions={owedToYou} people={overview.people} />
+            </section>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

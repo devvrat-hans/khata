@@ -37,7 +37,7 @@ export function AddPersonForm({ autoFocus = false }: { autoFocus?: boolean }) {
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-4">
         <Field htmlFor={`${id}-email`} label="Email address">
           <Input
             id={`${id}-email`}
@@ -49,19 +49,20 @@ export function AddPersonForm({ autoFocus = false }: { autoFocus?: boolean }) {
             onChange={(event) => setEmail(event.target.value)}
             autoFocus={autoFocus}
             aria-invalid={error ? true : undefined}
+            className="h-11"
           />
         </Field>
         <Field htmlFor={`${id}-name`} label="Name (optional)">
-          <Input id={`${id}-name`} maxLength={60} value={name} onChange={(event) => setName(event.target.value)} />
+          <Input id={`${id}-name`} maxLength={60} value={name} onChange={(event) => setName(event.target.value)} className="h-11" />
         </Field>
       </div>
       {error ? (
-        <p role="alert" className="border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+        <p role="alert" className="border-l-2 border-danger bg-danger-soft px-3 py-2 text-sm text-danger-strong">
           {error}
         </p>
       ) : null}
       <div>
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" variant="brand" size="lg" disabled={pending}>
           {pending ? <Spinner size="sm" /> : <IconUserPlus aria-hidden="true" />}
           {pending ? "Adding…" : "Add person"}
         </Button>

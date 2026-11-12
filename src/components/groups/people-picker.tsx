@@ -49,18 +49,18 @@ export function PeoplePicker({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-10">
       {contacts.length > 0 ? (
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-2 text-sm font-medium">People you know</legend>
-          <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+          <legend className="type-meta mb-3 text-muted-foreground">People you know</legend>
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {contacts.map((contact) => {
               const checkboxId = `${id}-${contact.id}`;
               return (
                 <li key={contact.id}>
                   <label
                     htmlFor={checkboxId}
-                    className="flex cursor-pointer items-center gap-3 border border-border p-2 transition-colors hover:bg-muted/40 has-[[data-state=checked]]:border-primary-300 has-[[data-state=checked]]:bg-primary-50/60 dark:has-[[data-state=checked]]:border-primary-800 dark:has-[[data-state=checked]]:bg-primary-950/30"
+                    className="flex cursor-pointer items-center gap-3 border border-separator p-2.5 transition-colors duration-200 hover:border-foreground has-[[data-state=checked]]:border-foreground has-[[data-state=checked]]:bg-surface"
                   >
                     <Checkbox
                       id={checkboxId}
@@ -81,7 +81,7 @@ export function PeoplePicker({
       ) : null}
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-sm font-medium">{contacts.length > 0 ? "Add someone new" : "Add people"}</legend>
+        <legend className="type-meta mb-3 text-muted-foreground">{contacts.length > 0 ? "Add someone new" : "Add people"}</legend>
         {newPeople.map((person, index) => (
           <div key={person.key} className="flex items-start gap-2">
             <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-[1.4fr_1fr]">
@@ -93,6 +93,7 @@ export function PeoplePicker({
                 aria-label={`Email of person ${index + 1}`}
                 value={person.email}
                 onChange={(event) => update(person.key, "email", event.target.value)}
+                className="h-11"
               />
               <Input
                 placeholder="Name (optional)"
@@ -100,12 +101,13 @@ export function PeoplePicker({
                 value={person.name}
                 maxLength={60}
                 onChange={(event) => update(person.key, "name", event.target.value)}
+                className="h-11"
               />
             </div>
             <Button
               type="button"
               variant="ghost"
-              size="icon"
+              size="icon-lg"
               aria-label={`Remove person ${index + 1}`}
               onClick={() =>
                 onChangeNew(
@@ -118,7 +120,7 @@ export function PeoplePicker({
           </div>
         ))}
         <div>
-          <Button type="button" variant="outline" size="sm" onClick={() => onChangeNew([...newPeople, blankPerson()])}>
+          <Button type="button" variant="outline" onClick={() => onChangeNew([...newPeople, blankPerson()])}>
             <IconPlus aria-hidden="true" />
             Add another
           </Button>

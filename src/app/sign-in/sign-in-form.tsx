@@ -102,16 +102,16 @@ export function SignInForm({
   }
 
   const errorBox = error ? (
-    <p role="alert" className="border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+    <p role="alert" className="border-l-2 border-danger bg-danger-soft px-3 py-2 text-sm text-danger-strong">
       {error}
     </p>
   ) : null;
 
   if (step === "code") {
     return (
-      <form onSubmit={verify} className="flex flex-col gap-4" noValidate>
-        <p className="text-sm text-foreground">
-          We sent a 6 digit code to <span className="font-semibold">{email}</span>. It expires in 10 minutes.
+      <form onSubmit={verify} className="flex flex-col gap-5" noValidate>
+        <p className="text-[0.9375rem] leading-relaxed text-foreground">
+          We sent a 6 digit code to <span className="font-medium">{email}</span>. It expires in 10 minutes.
         </p>
         <Field htmlFor={`${id}-code`} label="Sign-in code">
           <Input
@@ -129,7 +129,7 @@ export function SignInForm({
           />
         </Field>
         {errorBox}
-        <Button type="submit" size="lg" disabled={pending !== null}>
+        <Button type="submit" variant="brand" size="lg" disabled={pending !== null} className="h-12">
           {pending === "code" ? <Spinner size="sm" /> : null}
           {pending === "code" ? "Signing in…" : "Sign in"}
         </Button>
@@ -140,7 +140,7 @@ export function SignInForm({
               setStep("email");
               setError(null);
             }}
-            className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
+            className="link-quiet inline-flex items-center gap-1"
           >
             <IconArrowLeft aria-hidden="true" className="size-4" />
             Different email
@@ -149,7 +149,7 @@ export function SignInForm({
             type="button"
             onClick={() => sendCode()}
             disabled={cooldown > 0 || pending !== null}
-            className="text-link hover:text-link-hover disabled:cursor-not-allowed disabled:text-muted-foreground"
+            className="link-inline font-medium disabled:cursor-not-allowed disabled:text-muted-foreground disabled:no-underline"
           >
             {cooldown > 0 ? `Send a new code in ${cooldown}s` : "Send a new code"}
           </button>
@@ -159,21 +159,21 @@ export function SignInForm({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {googleEnabled ? (
         <>
-          <Button type="button" variant="outline" size="lg" onClick={google} disabled={pending !== null}>
+          <Button type="button" variant="outline" size="lg" onClick={google} disabled={pending !== null} className="h-12">
             {pending === "google" ? <Spinner size="sm" /> : <IconBrandGoogle aria-hidden="true" />}
             Continue with Google
           </Button>
-          <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-muted-foreground">
+          <div className="type-meta flex items-center gap-3 text-muted-foreground">
             <span className="h-px flex-1 bg-border" />
             or
             <span className="h-px flex-1 bg-border" />
           </div>
         </>
       ) : null}
-      <form onSubmit={sendCode} className="flex flex-col gap-4" noValidate>
+      <form onSubmit={sendCode} className="flex flex-col gap-5" noValidate>
         <Field htmlFor={`${id}-email`} label="Email address">
           <Input
             id={`${id}-email`}
@@ -186,10 +186,17 @@ export function SignInForm({
             onChange={(event) => setEmail(event.target.value)}
             aria-invalid={error ? true : undefined}
             required
+            className="h-11"
           />
         </Field>
         {errorBox}
-        <Button type="submit" size="lg" variant={googleEnabled ? "default" : "brand"} disabled={pending !== null}>
+        <Button
+          type="submit"
+          size="lg"
+          variant={googleEnabled ? "default" : "brand"}
+          disabled={pending !== null}
+          className="h-12"
+        >
           {pending === "email" ? <Spinner size="sm" /> : <IconMail aria-hidden="true" />}
           {pending === "email" ? "Sending…" : "Email me a code"}
         </Button>

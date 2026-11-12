@@ -1,4 +1,3 @@
-import { Badge } from "@aback-ui/ui";
 import { IconArrowLeft } from "@tabler/icons-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -7,7 +6,8 @@ import { AddMembersForm } from "@/components/groups/add-members-form";
 import { GroupSettingsForm } from "@/components/groups/group-settings-form";
 import { InviteLink } from "@/components/groups/invite-link";
 import { DeleteGroupButton, LeaveGroupButton, RemoveMemberButton } from "@/components/groups/member-actions";
-import { PageTitle } from "@/components/page-title";
+import { StatusMark } from "@/components/editorial";
+import { PageTitle, RailSection } from "@/components/page-title";
 import { PersonAvatar } from "@/components/person-avatar";
 import { requireOnboardedViewer } from "@/server/auth/session";
 import { getDb } from "@/server/db/client";
@@ -18,20 +18,6 @@ import { listMembers } from "@/server/services/groups";
 import { listConnectedPeople } from "@/server/services/people";
 
 export const metadata: Metadata = { title: "Group settings" };
-
-function Section({ id, title, description, children }: { id?: string; title: string; description?: string; children: React.ReactNode }) {
-  return (
-    <section id={id} aria-labelledby={`${id ?? title}-heading`} className="scroll-mt-20 border border-border bg-card">
-      <div className="border-b border-border px-5 py-4">
-        <h2 id={`${id ?? title}-heading`} className="text-lg font-semibold">
-          {title}
-        </h2>
-        {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
-      </div>
-      <div className="p-5">{children}</div>
-    </section>
-  );
-}
 
 export default async function GroupSettingsPage({ params }: { params: Promise<{ groupId: string }> }) {
   const { groupId } = await params;
@@ -51,37 +37,41 @@ export default async function GroupSettingsPage({ params }: { params: Promise<{ 
   const isOwner = role === "owner";
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-      <div>
+    <div className="flex flex-col gap-14 md:gap-20">
+      <div className="flex flex-col gap-8">
         <Link
           href={`/groups/${group.id}`}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          className="link-quiet inline-flex w-fit items-center gap-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-focus-ring"
         >
           <IconArrowLeft aria-hidden="true" className="size-4" />
           {group.name}
         </Link>
+        <PageTitle eyebrow={group.name} title="Group settings" description="Changes apply to everyone in the group." />
       </div>
-      <PageTitle title="Group settings" description="Changes apply to everyone in the group." />
 
-      <Section title="Details">
+      <RailSection id="details" title="Details" description="The name, the kind of group, its currency and how debts are shown.">
         <GroupSettingsForm
           groupId={group.id}
           initial={{ name: group.name, kind: group.kind, currency: group.currency, simplifyDebts: group.simplifyDebts }}
         />
-      </Section>
+      </RailSection>
 
-      <Section id="members" title="Members" description="Anyone in the group can add people. Only the owner can remove them.">
-        <ul className="mb-6 divide-y divide-border border border-border">
+      <RailSection
+        id="members"
+        title="Members"
+        description="Anyone in the group can add people. Only the owner can remove them."
+      >
+        <ul className="mb-10 border-t border-border">
           {members.map((member) => (
-            <li key={member.id} className="flex items-center gap-3 px-3 py-2.5">
+            <li key={member.id} className="flex items-center gap-3 border-b border-border py-3.5">
               <PersonAvatar person={member} size="sm" />
               <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-1.5 text-sm font-medium">
+                <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-medium">
                   {member.id === viewer.id ? `${member.name} (you)` : member.name}
-                  {member.role === "owner" ? <Badge variant="muted">Owner</Badge> : null}
-                  {!member.joined ? <Badge variant="warning">Invited</Badge> : null}
+                  {member.role === "owner" ? <StatusMark tone="brand">Owner</StatusMark> : null}
+                  {!member.joined ? <StatusMark tone="warning">Invited</StatusMark> : null}
                 </span>
-                <span className="block truncate text-xs text-muted-foreground">{member.email}</span>
+                <span className="mt-0.5 block truncate text-xs text-muted-foreground">{member.email}</span>
               </span>
               {isOwner && member.id !== viewer.id ? (
                 <RemoveMemberButton groupId={group.id} memberId={member.id} name={member.name} />
@@ -89,11 +79,12 @@ export default async function GroupSettingsPage({ params }: { params: Promise<{ 
             </li>
           ))}
         </ul>
-        <h3 className="mb-3 text-base font-semibold">Add people</h3>
+        <h3 className="type-meta mb-4 text-muted-foreground">Add people</h3>
         <AddMembersForm groupId={group.id} contacts={contacts} />
-      </Section>
+      </RailSection>
 
-      <Section
+      <RailSection
+        id="join-link"
         title="Join link"
         description="Anyone with this link can join the group after signing in. Share it in your group chat."
       >
@@ -104,14 +95,19 @@ export default async function GroupSettingsPage({ params }: { params: Promise<{ 
           code={group.inviteCode}
           canReset={isOwner}
         />
-      </Section>
+      </RailSection>
 
-      <Section title="Leave or delete">
+      <RailSection
+        id="leave"
+        tone="danger"
+        title="Leave or delete"
+        description="You can leave once your shared balance is settled. Deleting needs every balance settled, private ones included."
+      >
         <div className="flex flex-wrap gap-2">
           <LeaveGroupButton groupId={group.id} isOwner={isOwner} />
           {isOwner ? <DeleteGroupButton groupId={group.id} groupName={group.name} /> : null}
         </div>
-      </Section>
+      </RailSection>
     </div>
   );
 }

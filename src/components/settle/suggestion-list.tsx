@@ -8,7 +8,7 @@ import { PersonAvatar } from "../person-avatar";
 
 export function SuggestionList({ suggestions, people }: { suggestions: SettleSuggestion[]; people: PeopleIndex }) {
   return (
-    <ul className="divide-y divide-border border border-border bg-card">
+    <ul className="border-t border-border">
       {suggestions.map((suggestion) => {
         const person = people[suggestion.personId];
         const name = person?.name ?? "Someone";
@@ -20,27 +20,33 @@ export function SuggestionList({ suggestions, people }: { suggestions: SettleSug
               ? `Private in ${suggestion.groupName ?? "a group"}`
               : (suggestion.groupName ?? "A group");
         return (
-          <li key={suggestion.key} className="flex min-h-16 items-center gap-3 px-4 py-3">
+          <li key={suggestion.key} className="flex min-h-[4.5rem] items-center gap-4 border-b border-border py-4">
             {person ? <PersonAvatar person={person} /> : null}
             <span className="min-w-0 flex-1">
-              <span className="block text-sm">
+              <span className="block text-[0.9375rem]">
                 {owesYou ? (
                   <>
                     <span className="font-medium">{name}</span> owes you{" "}
-                    <span className="font-semibold tabular-nums text-success">
+                    <span className="font-medium tabular-nums text-success">
                       {formatMoney(suggestion.amount, suggestion.currency)}
                     </span>
                   </>
                 ) : (
                   <>
                     You owe <span className="font-medium">{name}</span>{" "}
-                    <span className="font-semibold tabular-nums text-danger">
+                    <span className="font-medium tabular-nums text-danger">
                       {formatMoney(suggestion.amount, suggestion.currency)}
                     </span>
                   </>
                 )}
               </span>
-              <span className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
+              <span
+                className={
+                  suggestion.source === "private"
+                    ? "type-meta mt-1 flex items-center gap-1 text-primary-700 dark:text-primary-400"
+                    : "type-meta mt-1 flex items-center gap-1 text-muted-foreground"
+                }
+              >
                 {suggestion.source === "private" ? <IconLock aria-hidden="true" className="size-3" /> : null}
                 {where}
               </span>

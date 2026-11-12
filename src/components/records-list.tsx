@@ -1,4 +1,3 @@
-import { Badge } from "@aback-ui/ui";
 import { IconCash, IconLock } from "@tabler/icons-react";
 import Link from "next/link";
 import { Fragment } from "react";
@@ -22,9 +21,9 @@ function name(people: PeopleIndex, id: string, viewerId: string, capital = false
 function DateBadge({ date }: { date: string }) {
   const { month, day } = dayParts(date);
   return (
-    <span className="flex w-10 shrink-0 flex-col items-center border border-border bg-background py-1 leading-none">
-      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{month}</span>
-      <span className="mt-1 text-base font-semibold tabular-nums text-foreground">{day}</span>
+    <span className="flex w-9 shrink-0 flex-col items-start leading-none">
+      <span className="text-xl font-medium tracking-[-0.03em] tabular-nums text-foreground">{day}</span>
+      <span className="type-meta mt-1 text-muted-foreground">{month}</span>
     </span>
   );
 }
@@ -42,12 +41,20 @@ function ExpenseImpact({ record, viewerId }: { record: ExpenseRecord; viewerId: 
   const paid = record.payers.find((payer) => payer.userId === viewerId)?.amount ?? 0;
   const share = record.shares.find((portion) => portion.userId === viewerId)?.amount ?? 0;
   const net = paid - share;
-  if (paid === 0 && share === 0) return <span className="shrink-0 text-sm text-muted-foreground">not involved</span>;
-  if (net === 0) return <span className="shrink-0 text-sm text-muted-foreground">even</span>;
+  if (paid === 0 && share === 0) return <span className="type-meta shrink-0 text-muted-foreground">not involved</span>;
+  if (net === 0) return <span className="type-meta shrink-0 text-muted-foreground">even</span>;
   return (
-    <span className="flex shrink-0 flex-col items-end text-right">
-      <span className={net > 0 ? "text-xs text-success" : "text-xs text-danger"}>{net > 0 ? "you lent" : "you borrowed"}</span>
-      <span className={net > 0 ? "text-base font-semibold tabular-nums text-success" : "text-base font-semibold tabular-nums text-danger"}>
+    <span className="flex shrink-0 flex-col items-end gap-0.5 text-right">
+      <span className={net > 0 ? "type-meta text-success" : "type-meta text-danger"}>
+        {net > 0 ? "you lent" : "you borrowed"}
+      </span>
+      <span
+        className={
+          net > 0
+            ? "text-base font-medium tracking-[-0.01em] tabular-nums text-success"
+            : "text-base font-medium tracking-[-0.01em] tabular-nums text-danger"
+        }
+      >
         {formatMoney(net, record.currency)}
       </span>
     </span>
@@ -60,10 +67,10 @@ function privateLabel(record: LedgerRecord, people: PeopleIndex, viewerId: strin
   if (record.groupId) {
     const groupName = showGroup?.[record.groupId];
     return (
-      <Badge variant="brand" className="gap-1">
-        <IconLock aria-hidden="true" className="size-3" />
+      <span className="inline-flex items-center gap-1 font-medium text-primary-700 dark:text-primary-400">
+        <IconLock aria-hidden="true" className="size-3.5" />
         {showGroup ? `Private in ${groupName ?? "a group"}` : `Private with ${other ? shortName(people, other, viewerId) : "one person"}`}
-      </Badge>
+      </span>
     );
   }
   return null;
@@ -84,15 +91,15 @@ function ExpenseItem({
   return (
     <Link
       href={`/expenses/${record.id}`}
-      className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring"
+      className="row-link -mx-3 flex items-center gap-4 px-3 py-4"
     >
       <DateBadge date={record.date} />
-      <span className="hidden size-10 shrink-0 items-center justify-center bg-muted text-muted-foreground sm:flex">
+      <span className="hidden size-10 shrink-0 items-center justify-center border border-border text-muted-foreground sm:flex">
         <Icon aria-hidden="true" className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-base font-medium text-foreground">{record.description}</span>
-        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+        <span className="block truncate text-base font-medium tracking-[-0.01em] text-foreground">{record.description}</span>
+        <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
           {payersText(record, people, viewerId)}
           {privateLabel(record, people, viewerId, groupNames)}
         </span>
@@ -116,16 +123,16 @@ function SettlementItem({
   const amount = formatMoney(record.amount, record.currency);
   const involved = record.fromUserId === viewerId || record.toUserId === viewerId;
   return (
-    <div className="flex items-center gap-3 px-4 py-3">
+    <div className="-mx-3 flex items-center gap-4 px-3 py-4">
       <DateBadge date={record.date} />
-      <span className="hidden size-10 shrink-0 items-center justify-center bg-success-soft text-success sm:flex">
+      <span className="hidden size-10 shrink-0 items-center justify-center border border-success/40 text-success sm:flex">
         <IconCash aria-hidden="true" className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-base font-medium text-foreground">
+        <span className="block text-base font-medium tracking-[-0.01em] text-foreground">
           {name(people, record.fromUserId, viewerId, true)} paid {name(people, record.toUserId, viewerId)}
         </span>
-        <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+        <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
           {PAYMENT_METHOD_LABELS[record.method]}
           {record.note ? `: ${record.note}` : ""}
           {privateLabel(record, people, viewerId, groupNames)}
@@ -135,11 +142,11 @@ function SettlementItem({
         settlementId={record.id}
         label={`${name(people, record.fromUserId, viewerId, true)} paid ${name(people, record.toUserId, viewerId)} ${amount}`}
       />
-      <span className="flex shrink-0 flex-col items-end text-right">
-        <span className="text-xs text-muted-foreground">
+      <span className="flex shrink-0 flex-col items-end gap-0.5 text-right">
+        <span className="type-meta text-muted-foreground">
           {!involved ? "payment" : record.fromUserId === viewerId ? "you paid" : "you received"}
         </span>
-        <span className="text-base font-semibold tabular-nums text-foreground">{amount}</span>
+        <span className="text-base font-medium tracking-[-0.01em] tabular-nums text-foreground">{amount}</span>
       </span>
     </div>
   );
@@ -163,24 +170,18 @@ export function RecordsList({
 }) {
   const months = records.map((record) => formatMonth(record.date));
   return (
-    <div className="border border-border bg-card">
+    <div>
       {records.map((record, index) => {
         const month = months[index] ?? "";
         const header = index === 0 || months[index - 1] !== month;
         return (
           <Fragment key={`${record.kind}-${record.id}`}>
             {header ? (
-              <h3
-                className={
-                  index === 0
-                    ? "bg-muted/40 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                    : "border-t border-border bg-muted/40 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                }
-              >
+              <h3 className={index === 0 ? "type-meta pb-2 text-muted-foreground" : "type-meta pt-8 pb-2 text-muted-foreground"}>
                 {month}
               </h3>
             ) : null}
-            <div className="border-t border-border">
+            <div className={header ? "border-y border-border" : "border-b border-border"}>
               {record.kind === "expense" ? (
                 <ExpenseItem record={record} people={people} viewerId={viewerId} groupNames={groupNames} />
               ) : (

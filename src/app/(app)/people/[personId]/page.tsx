@@ -1,10 +1,11 @@
-import { Button, EmptyState } from "@aback-ui/ui";
-import { IconCash, IconLock, IconPlus } from "@tabler/icons-react";
+import { Button } from "@aback-ui/ui";
+import { IconLock, IconPlus } from "@tabler/icons-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BalanceHeadline } from "@/components/money";
-import { PageTitle, SectionTitle } from "@/components/page-title";
+import { ArrowLink } from "@/components/editorial";
+import { EmptyPanel, PageTitle, SectionTitle } from "@/components/page-title";
 import { ReminderButton } from "@/components/people/reminder-button";
 import { PersonAvatar } from "@/components/person-avatar";
 import { RecordsList } from "@/components/records-list";
@@ -40,44 +41,38 @@ export default async function PersonPage({ params }: { params: Promise<{ personI
   const owesViewer = Object.values(balance.total).some((value) => value > 0);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-12 md:gap-16">
       <PageTitle
-        description={person.joined ? person.email : `${person.email}, invited and has not signed in yet`}
+        eyebrow={person.joined ? "Hisab" : "Invited, has not signed in yet"}
         title={
-          <span className="flex items-center gap-3">
-            <PersonAvatar person={person} size="lg" />
+          <span className="flex items-center gap-4">
+            <PersonAvatar person={person} size="lg" className="shrink-0" />
             <span className="min-w-0 break-words">{person.name}</span>
           </span>
         }
+        description={person.email}
         actions={
           <>
-            <Button asChild variant="brand" className="flex-1 sm:flex-none">
+            <Button asChild variant="brand" size="lg" className="flex-1 sm:flex-none">
               <Link href={`/expenses/new?person=${person.id}`}>
                 <IconPlus aria-hidden="true" />
                 Add expense
               </Link>
             </Button>
-            <Button asChild variant="outline" className="flex-1 sm:flex-none">
-              <Link href={`/settle?person=${person.id}`}>
-                <IconCash aria-hidden="true" />
-                Settle up
-              </Link>
-            </Button>
+            <ArrowLink href={`/settle?person=${person.id}`}>Settle up</ArrowLink>
           </>
         }
       />
 
-      <section aria-label="Balance" className="border border-border bg-card">
-        <div className="p-5 sm:p-6">
-          <BalanceHeadline
-            balance={balance.total}
-            owedLabel={`${first} owes you`}
-            owesLabel={`You owe ${first}`}
-            settledLabel={`You and ${first} are settled up`}
-          />
-        </div>
+      <section aria-label="Balance" className="flex flex-col gap-8">
+        <BalanceHeadline
+          balance={balance.total}
+          owedLabel={`${first} owes you`}
+          owesLabel={`You owe ${first}`}
+          settledLabel={`You and ${first} are settled up`}
+        />
         {owesViewer ? (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border px-5 py-3 sm:px-6">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-y border-border py-4">
             <ReminderButton
               personId={person.id}
               disabledReason={page.remindedAt ? "You can send one reminder a day." : undefined}
@@ -91,62 +86,70 @@ export default async function PersonPage({ params }: { params: Promise<{ personI
         ) : null}
       </section>
 
-      {suggestions.length > 0 ? (
-        <section aria-labelledby="settle-heading">
-          <SectionTitle id="settle-heading" title="Open balances" />
-          <SuggestionList suggestions={suggestions} people={page.people} />
-        </section>
-      ) : null}
-
-      <section aria-labelledby="between-heading">
-        <SectionTitle id="between-heading" title={`Between you and ${first}`} />
-        <p className="-mt-2 mb-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-          <IconLock aria-hidden="true" className="size-3.5" />
-          Only the two of you can see these, including private hisabs inside groups.
-        </p>
-        {page.records.length > 0 ? (
-          <RecordsList records={page.records} people={page.people} viewerId={viewer.id} groupNames={page.groupNames} />
-        ) : (
-          <EmptyState
-            title="Nothing recorded between you two yet"
-            description="Add an expense that is just between the two of you."
-            action={
-              <Button asChild variant="brand">
-                <Link href={`/expenses/new?person=${person.id}`}>Add expense</Link>
-              </Button>
-            }
-          />
-        )}
-      </section>
-
-      {page.sharedGroups.length > 0 ? (
-        <section aria-labelledby="groups-heading">
-          <SectionTitle id="groups-heading" title="Groups you share" />
-          <ul className="flex flex-wrap gap-2">
-            {page.sharedGroups.map((group) => (
-              <li key={group.id}>
-                <Link
-                  href={`/groups/${group.id}`}
-                  className="inline-flex items-center gap-1.5 border border-separator px-3 py-1.5 text-sm font-medium transition-colors hover:border-primary-400 hover:text-primary-700 dark:hover:text-primary-400"
-                >
-                  {group.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Something private inside one of these groups?{" "}
-            {page.sharedGroups[0] ? (
-              <Link
-                href={`/expenses/new?group=${page.sharedGroups[0].id}&with=${person.id}`}
-                className="text-link hover:underline"
-              >
-                Add a private expense
-              </Link>
-            ) : null}
+      <div className="grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-x-12">
+        <section aria-labelledby="between-heading" className="min-w-0 lg:col-span-8">
+          <SectionTitle id="between-heading" title={`Between you and ${first}`} count={page.records.length} />
+          <p className="-mt-1 mb-6 flex items-center gap-2 text-sm text-muted-foreground">
+            <IconLock aria-hidden="true" className="size-3.5 shrink-0 text-primary-700 dark:text-primary-400" />
+            Only the two of you can see these, including private hisabs inside groups.
           </p>
+          {page.records.length > 0 ? (
+            <RecordsList records={page.records} people={page.people} viewerId={viewer.id} groupNames={page.groupNames} />
+          ) : (
+            <EmptyPanel
+              title="Nothing recorded between you two yet."
+              description="Add an expense that is just between the two of you."
+              action={
+                <Button asChild variant="brand" size="lg">
+                  <Link href={`/expenses/new?person=${person.id}`}>Add expense</Link>
+                </Button>
+              }
+            />
+          )}
         </section>
-      ) : null}
+
+        <div className="flex flex-col gap-14 lg:col-span-4">
+          {suggestions.length > 0 ? (
+            <section aria-labelledby="settle-heading">
+              <SectionTitle id="settle-heading" title="Open balances" count={suggestions.length} />
+              <SuggestionList suggestions={suggestions} people={page.people} />
+            </section>
+          ) : null}
+
+          {page.sharedGroups.length > 0 ? (
+            <section aria-labelledby="groups-heading">
+              <SectionTitle id="groups-heading" title="Groups you share" count={page.sharedGroups.length} />
+              <ul className="border-t border-border">
+                {page.sharedGroups.map((group) => (
+                  <li key={group.id} className="border-b border-border">
+                    <Link
+                      href={`/groups/${group.id}`}
+                      className="row-link -mx-3 flex items-center justify-between gap-3 px-3 py-3.5 text-sm font-medium"
+                    >
+                      {group.name}
+                      <span aria-hidden="true" className="text-muted-foreground">
+                        &rarr;
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              {page.sharedGroups[0] ? (
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                  Something private inside one of these groups?{" "}
+                  <Link
+                    href={`/expenses/new?group=${page.sharedGroups[0].id}&with=${person.id}`}
+                    className="link-inline font-medium text-foreground"
+                  >
+                    Add a private expense
+                  </Link>
+                </p>
+              ) : null}
+            </section>
+          ) : null}
+
+        </div>
+      </div>
     </div>
   );
 }

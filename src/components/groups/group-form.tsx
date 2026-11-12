@@ -59,8 +59,11 @@ export function GroupForm({ contacts, defaultCurrency }: { contacts: ContactOpti
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-6" noValidate>
-      <Field htmlFor={`${id}-name`} label="Group name" required>
+    <form onSubmit={submit} className="flex flex-col gap-10" noValidate>
+      <div className="flex flex-col gap-2">
+        <label htmlFor={`${id}-name`} className="type-meta text-muted-foreground">
+          Group name
+        </label>
         <Input
           id={`${id}-name`}
           placeholder="Goa trip, Flat 4B, Office lunches"
@@ -68,16 +71,23 @@ export function GroupForm({ contacts, defaultCurrency }: { contacts: ContactOpti
           maxLength={60}
           onChange={(event) => setName(event.target.value)}
           autoFocus
+          required
+          className="h-auto border-0 border-b border-separator bg-transparent px-0 py-2 text-3xl font-medium tracking-[-0.03em] shadow-none transition-colors duration-200 placeholder:font-normal focus-visible:border-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
         />
-      </Field>
-      <div className="flex flex-col gap-2">
-        <span id={`${id}-kind`} className="text-sm font-medium">
+      </div>
+      <div className="flex flex-col gap-3">
+        <span id={`${id}-kind`} className="type-meta text-muted-foreground">
           What is it for?
         </span>
         <KindPicker value={kind} onChange={setKind} labelledBy={`${id}-kind`} />
       </div>
       <Field htmlFor={`${id}-currency`} label="Currency" description="The default for new expenses. Any expense can use another currency.">
-        <CurrencySelect id={`${id}-currency`} value={currency} onChange={(event) => setCurrency(event.target.value)} />
+        <CurrencySelect
+          id={`${id}-currency`}
+          value={currency}
+          onChange={(event) => setCurrency(event.target.value)}
+          className="h-11"
+        />
       </Field>
       <PeoplePicker
         contacts={contacts}
@@ -87,16 +97,16 @@ export function GroupForm({ contacts, defaultCurrency }: { contacts: ContactOpti
         onChangeNew={setNewPeople}
       />
       {error ? (
-        <p role="alert" className="border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+        <p role="alert" className="border-l-2 border-danger bg-danger-soft px-3 py-2 text-sm text-danger-strong">
           {error}
         </p>
       ) : null}
-      <div className="flex flex-wrap gap-2">
-        <Button type="submit" variant="brand" size="lg" disabled={pending}>
+      <div className="flex flex-wrap gap-2 border-t border-border pt-6">
+        <Button type="submit" variant="brand" size="lg" disabled={pending} className="h-12 px-6">
           {pending ? <Spinner size="sm" /> : null}
           {pending ? "Creating…" : "Create group"}
         </Button>
-        <Button type="button" variant="ghost" size="lg" onClick={() => router.back()}>
+        <Button type="button" variant="ghost" size="lg" onClick={() => router.back()} className="h-12">
           Cancel
         </Button>
       </div>

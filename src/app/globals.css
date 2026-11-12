@@ -5,9 +5,92 @@
 /* Tailwind v4 does not scan node_modules: point it at the component library. */
 @source "../../node_modules/@aback-ui/ui/dist";
 
+/*
+  Khata on the Aback design system, with the editorial layer of aback.group
+  (DESIGN.md, Appendix C): warm neutral hairlines, type that leads, ruled rows
+  instead of cards, and the deep brand blue (primary-700) as the one signal.
+  The values below refine the shared tokens; the component library reads them.
+*/
+:root {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f2;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f4f4f2;
+  --muted-foreground: #626262;
+  --accent: #f4f4f2;
+  --accent-foreground: #0a0a0a;
+  --border: #e6e6e3;
+  --separator: #d4d4d0;
+  --input: #d4d4d0;
+  --focus-ring: #007cc7;
+
+  /* Quiet alternate background for sections and row hover. */
+  --surface: #f8f8f6;
+
+  /* The one inverted band per page. */
+  --inverse: #0a0a0a;
+  --inverse-foreground: #fafafa;
+  --inverse-muted: #a3a3a3;
+  --inverse-border: rgb(255 255 255 / 0.16);
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  --card: #111111;
+  --card-foreground: #f5f5f5;
+  --popover: #141414;
+  --popover-foreground: #f5f5f5;
+  --primary: #f5f5f5;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1c1c1c;
+  --secondary-foreground: #f5f5f5;
+  --muted: #1c1c1c;
+  --muted-foreground: #a1a1a1;
+  --accent: #1c1c1c;
+  --accent-foreground: #f5f5f5;
+  --border: rgb(255 255 255 / 0.1);
+  --separator: rgb(255 255 255 / 0.18);
+  --input: rgb(255 255 255 / 0.18);
+  --focus-ring: #33b7ff;
+
+  --surface: #0f0f0f;
+
+  /* On a dark canvas the band lifts instead of inverting to white. */
+  --inverse: #151515;
+  --inverse-foreground: #f5f5f5;
+  --inverse-muted: #a1a1a1;
+  --inverse-border: rgb(255 255 255 / 0.14);
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-inverse: var(--inverse);
+  --color-inverse-foreground: var(--inverse-foreground);
+  --color-inverse-muted: var(--inverse-muted);
+  --color-inverse-border: var(--inverse-border);
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--color-primary-700);
+    color: #ffffff;
   }
 
   /* Amounts line up in columns everywhere. */
@@ -30,11 +113,141 @@
   }
 }
 
+/*
+  The component library gives outline buttons and fields a faint drop shadow.
+  aback.group uses none: a hairline that firms up on hover. Focus rings are
+  box-shadows too, so they are left alone.
+*/
+:is([data-slot="button"], [data-slot="copy-button"])[data-variant="outline"]:not(:focus-visible) {
+  box-shadow: none;
+}
+:is([data-slot="button"], [data-slot="copy-button"])[data-variant="outline"] {
+  border-color: var(--separator);
+  background-color: transparent;
+}
+:is([data-slot="button"], [data-slot="copy-button"])[data-variant="outline"]:hover:not(:disabled) {
+  border-color: var(--foreground);
+  background-color: transparent;
+}
+:is([data-slot="input"], [data-slot="select-control"], [data-slot="textarea"]):not(:focus-visible) {
+  box-shadow: none;
+}
+
+/* rounded-full still renders square: circular affordances are square. */
+.rounded-full {
+  border-radius: 0;
+}
+
+/* ---------- layout ---------- */
+
+/* Public pages: the aback.group measure. */
+@utility container-site {
+  @apply mx-auto w-full max-w-[82rem] px-5 sm:px-8 lg:px-12;
+}
+
+/* Signed-in pages: a narrower measure, so a ledger stays readable. */
+@utility container-app {
+  @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-10;
+}
+
 /* Room for the bottom navigation on phones, including the home indicator. */
 @utility pb-safe-nav {
-  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
 }
 
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ---------- editorial type scale (aback.group) ---------- */
+
+/* The landing statement. One per site. */
+@utility type-display {
+  font-size: clamp(2.5rem, 1rem + 6vw, 6rem);
+  line-height: 0.98;
+  letter-spacing: -0.048em;
+  font-weight: 500;
+}
+
+/* Page H1 on public pages. */
+@utility type-title {
+  font-size: clamp(2.375rem, 1.4rem + 4.1vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.042em;
+  font-weight: 500;
+}
+
+/* Page H1 inside the app: a step down, so the content stays in view. */
+@utility type-page {
+  font-size: clamp(2rem, 1.45rem + 2.2vw, 3.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+
+/* Section statements (H2). */
+@utility type-headline {
+  font-size: clamp(1.75rem, 1.25rem + 2.2vw, 3.125rem);
+  line-height: 1.05;
+  letter-spacing: -0.036em;
+  font-weight: 500;
+}
+
+/* Sub-statements and large running copy. */
+@utility type-subhead {
+  font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.75rem);
+  line-height: 1.24;
+  letter-spacing: -0.024em;
+  font-weight: 400;
+}
+
+/* Lede paragraph under a title. */
+@utility type-lede {
+  font-size: clamp(1.0625rem, 0.98rem + 0.4vw, 1.25rem);
+  line-height: 1.5;
+  letter-spacing: -0.012em;
+}
+
+/* The one number a page is about. */
+@utility type-figure {
+  font-size: clamp(2.75rem, 1.6rem + 4.6vw, 5.25rem);
+  line-height: 0.95;
+  letter-spacing: -0.05em;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A secondary figure in a stat strip. */
+@utility type-stat {
+  font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Mono metadata: indices, dates, column heads, labels. */
+@utility type-meta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------- links ---------- */
+
+/* Inline text link: ink with a hairline underline that firms up on hover. */
+@utility link-inline {
+  @apply underline decoration-separator decoration-1 underline-offset-4 transition-colors duration-200 hover:text-primary-700 hover:decoration-primary-600 dark:hover:text-primary-400 dark:hover:decoration-primary-400;
+}
+
+/* Quiet navigation link: muted until hovered. */
+@utility link-quiet {
+  @apply text-muted-foreground transition-colors duration-200 hover:text-foreground;
+}
+
+/* A full-width ruled row that is also a link. */
+@utility row-link {
+  @apply transition-colors duration-200 outline-none hover:bg-surface focus-visible:bg-surface focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-inset;
 }

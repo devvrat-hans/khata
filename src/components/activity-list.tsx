@@ -46,8 +46,8 @@ interface Described {
 /** Turns one feed row into a sentence, from the viewer's point of view. */
 function describe(item: FeedItem, people: PeopleIndex, viewerId: string): Described {
   const { activity, groupName } = item;
-  const actor = <strong className="font-semibold">{nameOf(people, activity.actorId, viewerId, true)}</strong>;
-  const target = <strong className="font-semibold">{nameOf(people, activity.targetUserId, viewerId)}</strong>;
+  const actor = <strong className="font-medium">{nameOf(people, activity.actorId, viewerId, true)}</strong>;
+  const target = <strong className="font-medium">{nameOf(people, activity.targetUserId, viewerId)}</strong>;
   const otherId = activity.pairA === viewerId ? activity.pairB : activity.pairA;
   const group = groupName ? <span className="font-medium">{groupName}</span> : <span>a group</span>;
   const where =
@@ -158,21 +158,23 @@ export function ActivityList({
   viewerId: string;
 }) {
   return (
-    <ul className="divide-y divide-border border border-border bg-card">
+    <ul className="border-t border-border">
       {items.map((item) => {
         const { icon: Icon, body, href } = describe(item, people, viewerId);
         const isPrivate = item.activity.visibility === "pair" && item.activity.groupId !== null;
         const content = (
           <>
-            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center bg-muted text-muted-foreground">
+            <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center border border-border text-muted-foreground">
               <Icon aria-hidden="true" className="size-4" />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-sm leading-relaxed text-foreground">{body}</span>
-              <span className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                <RelativeTime date={item.activity.createdAt} />
+              <span className="block text-[0.9375rem] leading-relaxed text-foreground">{body}</span>
+              <span className="mt-1 flex items-center gap-3 text-muted-foreground">
+                <span className="type-meta">
+                  <RelativeTime date={item.activity.createdAt} />
+                </span>
                 {isPrivate ? (
-                  <span className="inline-flex items-center gap-1">
+                  <span className="type-meta inline-flex items-center gap-1 text-primary-700 dark:text-primary-400">
                     <IconLock aria-hidden="true" className="size-3" />
                     Private
                   </span>
@@ -182,16 +184,13 @@ export function ActivityList({
           </>
         );
         return (
-          <li key={item.activity.id}>
+          <li key={item.activity.id} className="border-b border-border">
             {href ? (
-              <Link
-                href={href}
-                className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus-ring"
-              >
+              <Link href={href} className="row-link -mx-3 flex items-start gap-4 px-3 py-4">
                 {content}
               </Link>
             ) : (
-              <div className="flex items-start gap-3 px-4 py-3">{content}</div>
+              <div className="-mx-3 flex items-start gap-4 px-3 py-4">{content}</div>
             )}
           </li>
         );

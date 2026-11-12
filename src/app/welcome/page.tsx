@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/account/profile-form";
-import { Logo } from "@/components/logo";
+import { SectionLabel } from "@/components/editorial";
+import { BareHeader } from "@/components/site-chrome";
 import { requireViewer } from "@/server/auth/session";
 import { safeNext } from "@/lib/safe-next";
 import { nameFromEmail } from "@/server/services/users";
@@ -18,30 +19,30 @@ export default async function WelcomePage({
   if (viewer.onboarded) redirect(next);
 
   return (
-    <div className="flex min-h-dvh flex-col bg-muted/30">
-      <header className="flex h-16 items-center border-b border-separator bg-background px-4 md:px-6">
-        <Logo href="/welcome" />
-      </header>
-      <main id="main-content" className="flex flex-1 justify-center px-4 py-10">
-        <div className="w-full max-w-lg border border-border bg-card p-6 shadow-sm sm:p-8">
-          <p className="text-xs font-medium uppercase tracking-wide text-primary-700 dark:text-primary-400">
-            Welcome to Khata
-          </p>
-          <h1 className="mt-2 text-2xl font-bold tracking-tight">Let’s get you set up</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Check your name and pick the currency you use most. You can change all of this later in settings.
-          </p>
-          <div className="mt-6">
-            <ProfileForm
-              mode="welcome"
-              redirectTo={next}
-              initial={{
-                name: viewer.name || nameFromEmail(viewer.email),
-                defaultCurrency: viewer.defaultCurrency,
-                upiId: viewer.upiId ?? "",
-                emailNotifications: viewer.emailNotifications,
-              }}
-            />
+    <div className="flex min-h-dvh flex-col">
+      <BareHeader href="/welcome" />
+      <main id="main-content" className="flex-1">
+        <div className="container-site grid gap-14 py-14 md:py-24 lg:grid-cols-12 lg:gap-10">
+          <div className="lg:col-span-5">
+            <SectionLabel>Welcome to Khata</SectionLabel>
+            <h1 className="type-title mt-8 max-w-[12ch] text-balance md:mt-10">Let&rsquo;s get you set up.</h1>
+            <p className="type-lede mt-6 max-w-md text-muted-foreground">
+              Check your name and pick the currency you use most. You can change all of this later in settings.
+            </p>
+          </div>
+          <div className="lg:col-span-6 lg:col-start-7">
+            <div className="border-t border-foreground pt-8">
+              <ProfileForm
+                mode="welcome"
+                redirectTo={next}
+                initial={{
+                  name: viewer.name || nameFromEmail(viewer.email),
+                  defaultCurrency: viewer.defaultCurrency,
+                  upiId: viewer.upiId ?? "",
+                  emailNotifications: viewer.emailNotifications,
+                }}
+              />
+            </div>
           </div>
         </div>
       </main>

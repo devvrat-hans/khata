@@ -10,13 +10,11 @@ import {
   Spinner,
   Switch,
   Textarea,
-  ToggleGroup,
-  ToggleGroupItem,
   toast,
 } from "@aback-ui/ui";
 import { IconLock, IconPlus } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useId, useMemo, useState, useTransition } from "react";
+import { type FormEvent, type ReactNode, useId, useMemo, useState, useTransition } from "react";
 import { formatMoney, parseAmount, parseDecimal } from "@/domain/money";
 import { checkPayers, computeSplit, describeSplitError, type SplitMethod } from "@/domain/split";
 import { CATEGORY_LABELS, type CategoryValue } from "@/lib/labels";
@@ -69,17 +67,52 @@ const SPLIT_OPTIONS: { value: SplitMethod; label: string }[] = [
   { value: "shares", label: "Shares" },
 ];
 
-const panel = "border border-border bg-card p-4 sm:p-5";
 const focusRing =
   "outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+/** A selectable chip: ink when chosen, a hairline otherwise. */
 const choice = (selected: boolean) =>
   cn(
     "border text-sm transition-colors duration-200",
     focusRing,
     selected
-      ? "border-primary-500 bg-primary-50 font-medium text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"
-      : "border-border bg-background hover:bg-muted",
+      ? "border-foreground bg-foreground font-medium text-background"
+      : "border-separator bg-background text-foreground hover:border-foreground",
   );
+/** A large field set on a single hairline, for the two things every expense needs. */
+const bareInput =
+  "h-auto border-0 border-b border-separator bg-transparent px-0 shadow-none transition-colors duration-200 focus-visible:border-foreground focus-visible:ring-0 focus-visible:ring-offset-0";
+
+/** A numbered step of the form, opened by an ink rule like every section head. */
+function Step({
+  index,
+  title,
+  titleId,
+  action,
+  children,
+  className,
+}: {
+  index: number;
+  title: string;
+  titleId?: string;
+  action?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section aria-labelledby={titleId} className={cn("border-t border-foreground pt-4", className)}>
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h2 id={titleId} className="flex items-baseline gap-3 text-lg font-medium tracking-[-0.02em]">
+          <span aria-hidden="true" className="type-meta text-muted-foreground">
+            {String(index).padStart(2, "0")}
+          </span>
+          {title}
+        </h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
 
 function splitValue(method: SplitMethod, raw: string, currency: string): number | null {
   const value = raw.trim();
@@ -274,114 +307,154 @@ export function ExpenseForm({
     ) : problem ? (
       <p className="text-sm text-danger">{problem}</p>
     ) : yourNet > 0 ? (
-      <p className="text-sm font-medium text-success">You lend {format(yourNet)}</p>
+      <p className="flex items-center gap-2 text-sm font-medium text-success">
+        <span aria-hidden="true" className="size-2 shrink-0 bg-success" />
+        You lend {format(yourNet)}
+      </p>
     ) : yourNet < 0 ? (
-      <p className="text-sm font-medium text-danger">You borrow {format(-yourNet)}</p>
+      <p className="flex items-center gap-2 text-sm font-medium text-danger">
+        <span aria-hidden="true" className="size-2 shrink-0 bg-danger" />
+        You borrow {format(-yourNet)}
+      </p>
     ) : (
       <p className="text-sm text-muted-foreground">You neither lend nor borrow on this.</p>
     );
 
+  // Step numbers, counted once: the quick split only shows for two people.
+  const offset = quick.length > 0 ? 1 : 0;
+
   return (
     <form
       onSubmit={submit}
-      className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-6"
+      className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-start lg:gap-x-12"
       noValidate
     >
-      <div className="flex min-w-0 flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-12 lg:col-span-8">
         {/* What and how much */}
-        <section aria-label="Expense details" className={cn(panel, "flex flex-col gap-4")}>
-          <Field htmlFor={`${id}-description`} label="Description" required>
-            <Input
-              id={`${id}-description`}
-              placeholder="Dinner, cab, groceries"
-              value={form.description}
-              maxLength={100}
-              onChange={(event) => set("description", event.target.value)}
-              autoFocus={!editing}
-            />
-          </Field>
-          <div className="grid grid-cols-[minmax(0,1fr)_8.5rem] gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
-            <Field htmlFor={`${id}-amount`} label="Amount" required>
+        <Step index={1} title="What it was" titleId={`${id}-details-heading`}>
+          <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-2">
+              <label htmlFor={`${id}-description`} className="type-meta text-muted-foreground">
+                Description
+              </label>
               <Input
-                id={`${id}-amount`}
-                inputMode="decimal"
-                placeholder="0"
-                autoComplete="off"
-                value={form.amount}
-                onChange={(event) => set("amount", event.target.value)}
-                className="h-14 text-3xl font-bold tabular-nums"
+                id={`${id}-description`}
+                placeholder="Dinner, cab, groceries"
+                value={form.description}
+                maxLength={100}
+                onChange={(event) => set("description", event.target.value)}
+                autoFocus={!editing}
+                required
+                className={cn(bareInput, "py-2 text-2xl font-medium tracking-[-0.025em] placeholder:font-normal")}
               />
-            </Field>
-            <Field htmlFor={`${id}-currency`} label="Currency">
-              <CurrencySelect
-                id={`${id}-currency`}
-                value={form.currency}
-                onChange={(event) => set("currency", event.target.value)}
-                className="h-14"
-              />
-            </Field>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field htmlFor={`${id}-category`} label="Category">
-              <Select
-                id={`${id}-category`}
-                value={form.category}
-                onChange={(event) => set("category", event.target.value as CategoryValue)}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor={`${id}-amount`} className="type-meta text-muted-foreground">
+                Amount
+              </label>
+              <div className="flex items-end gap-4">
+                <Input
+                  id={`${id}-amount`}
+                  inputMode="decimal"
+                  placeholder="0"
+                  autoComplete="off"
+                  value={form.amount}
+                  onChange={(event) => set("amount", event.target.value)}
+                  required
+                  className={cn(
+                    bareInput,
+                    "min-w-0 flex-1 py-1 text-5xl font-medium tracking-[-0.045em] tabular-nums sm:text-6xl",
+                  )}
+                />
+                <div className="w-24 shrink-0 pb-1">
+                  <CurrencySelect
+                    compact
+                    id={`${id}-currency`}
+                    aria-label="Currency"
+                    value={form.currency}
+                    onChange={(event) => set("currency", event.target.value)}
+                    className="h-11 font-medium"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <Field htmlFor={`${id}-category`} label="Category">
+                <Select
+                  id={`${id}-category`}
+                  value={form.category}
+                  onChange={(event) => set("category", event.target.value as CategoryValue)}
+                  className="h-11"
+                >
+                  {CATEGORY_VALUES.map((value) => (
+                    <option key={value} value={value}>
+                      {CATEGORY_LABELS[value]}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+              <Field htmlFor={`${id}-date`} label="Date">
+                <Input
+                  id={`${id}-date`}
+                  type="date"
+                  value={date}
+                  onChange={(event) => set("date", event.target.value)}
+                  className="h-11"
+                />
+              </Field>
+            </div>
+            {showNotes ? (
+              <Field htmlFor={`${id}-notes`} label="Notes (optional)">
+                <Textarea
+                  id={`${id}-notes`}
+                  rows={2}
+                  maxLength={500}
+                  placeholder="Anything worth remembering"
+                  value={form.notes}
+                  onChange={(event) => set("notes", event.target.value)}
+                  autoFocus={!initial.notes}
+                />
+              </Field>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowNotes(true)}
+                className={cn(
+                  "inline-flex w-fit items-center gap-1.5 border-b border-separator pb-0.5 text-sm font-medium transition-colors duration-200 hover:border-foreground",
+                  focusRing,
+                )}
               >
-                {CATEGORY_VALUES.map((value) => (
-                  <option key={value} value={value}>
-                    {CATEGORY_LABELS[value]}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field htmlFor={`${id}-date`} label="Date">
-              <Input id={`${id}-date`} type="date" value={date} onChange={(event) => set("date", event.target.value)} />
-            </Field>
+                <IconPlus aria-hidden="true" className="size-3.5" />
+                Add a note
+              </button>
+            )}
           </div>
-          {showNotes ? (
-            <Field htmlFor={`${id}-notes`} label="Notes (optional)">
-              <Textarea
-                id={`${id}-notes`}
-                rows={2}
-                maxLength={500}
-                placeholder="Anything worth remembering"
-                value={form.notes}
-                onChange={(event) => set("notes", event.target.value)}
-                autoFocus={!initial.notes}
-              />
-            </Field>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowNotes(true)}
-              className={cn("inline-flex items-center gap-1 self-start text-sm text-link hover:text-link-hover", focusRing)}
-            >
-              <IconPlus aria-hidden="true" className="size-4" />
-              Add a note
-            </button>
-          )}
-        </section>
+        </Step>
 
         {/* Private hisab inside a group */}
         {context.kind === "group" && otherMembers.length > 0 ? (
           <section
             aria-label="Privacy"
             className={cn(
-              "flex flex-col gap-3 border p-4 sm:px-5",
-              form.isPrivate
-                ? "border-primary-300 bg-primary-50/60 dark:border-primary-800 dark:bg-primary-950/30"
-                : "border-border bg-card",
+              "flex flex-col gap-5 border-l-2 py-1 pl-5 transition-colors duration-200",
+              form.isPrivate ? "border-primary-700 dark:border-primary-400" : "border-border",
             )}
           >
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start justify-between gap-6">
               <div>
-                <label htmlFor={`${id}-private`} className="flex items-center gap-1.5 text-sm font-medium">
-                  <IconLock aria-hidden="true" className="size-4 text-primary-600 dark:text-primary-400" />
+                <label
+                  htmlFor={`${id}-private`}
+                  className={cn(
+                    "flex items-center gap-2 text-base font-medium tracking-[-0.01em]",
+                    form.isPrivate ? "text-primary-700 dark:text-primary-400" : "text-foreground",
+                  )}
+                >
+                  <IconLock aria-hidden="true" className="size-4" />
                   Private between two
                 </label>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Only you and one other member see it. It stays out of the group&apos;s balances.
+                <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">
+                  Only you and one other member see it. It stays out of the group&apos;s balances, its feed and its
+                  export.
                 </p>
               </div>
               <Switch
@@ -397,29 +470,38 @@ export function ExpenseForm({
               />
             </div>
             {form.isPrivate ? (
-              <Field htmlFor={`${id}-with`} label="Between you and">
-                <Select
-                  id={`${id}-with`}
-                  value={form.privateWith ?? ""}
-                  disabled={editing}
-                  onChange={(event) => changePeople({ privateWith: event.target.value })}
-                >
+              <div className="flex flex-col gap-2">
+                <p id={`${id}-with-label`} className="type-meta text-muted-foreground">
+                  Between you and
+                </p>
+                <div role="radiogroup" aria-labelledby={`${id}-with-label`} className="flex flex-wrap gap-2">
                   {otherMembers.map((member) => (
-                    <option key={member.id} value={member.id}>
+                    <button
+                      key={member.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={form.privateWith === member.id}
+                      disabled={editing}
+                      onClick={() => changePeople({ privateWith: member.id })}
+                      className={cn(
+                        "inline-flex h-10 items-center gap-2 px-2.5 disabled:opacity-60",
+                        choice(form.privateWith === member.id),
+                      )}
+                    >
+                      <PersonAvatar person={member} size="xs" />
                       {member.name}
-                    </option>
+                    </button>
                   ))}
-                </Select>
-              </Field>
+                </div>
+              </div>
             ) : null}
           </section>
         ) : null}
 
         {/* Quick choices for two people */}
         {quick.length > 0 ? (
-          <fieldset className={panel}>
-            <legend className="float-left mb-3 w-full text-sm font-semibold">Quick split</legend>
-            <div className="clear-both grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <Step index={2} title="Quick split" titleId={`${id}-quick-heading`}>
+            <div role="group" aria-labelledby={`${id}-quick-heading`} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {quick.map((option, index) => (
                 <button
                   key={option.label}
@@ -434,31 +516,35 @@ export function ExpenseForm({
                       included: option.included,
                     }))
                   }
-                  className={cn("px-3 py-2.5 text-left", choice(activeQuick === index))}
+                  className={cn("px-3.5 py-3 text-left", choice(activeQuick === index))}
                 >
                   {option.label}
                 </button>
               ))}
             </div>
-          </fieldset>
+          </Step>
         ) : null}
 
         {/* Who paid */}
-        <section aria-labelledby={`${id}-paid-heading`} className={cn(panel, "flex flex-col gap-3")}>
-          <div className="flex items-center justify-between gap-2">
-            <h2 id={`${id}-paid-heading`} className="text-sm font-semibold">
-              Paid by
-            </h2>
-            {people.length > 1 ? (
+        <Step
+          index={2 + offset}
+          title="Paid by"
+          titleId={`${id}-paid-heading`}
+          action={
+            people.length > 1 ? (
               <button
                 type="button"
-                className={cn("text-sm text-link hover:text-link-hover", focusRing)}
+                className={cn(
+                  "border-b border-separator pb-0.5 text-sm font-medium transition-colors duration-200 hover:border-foreground",
+                  focusRing,
+                )}
                 onClick={() => set("payerMode", form.payerMode === "single" ? "multiple" : "single")}
               >
                 {form.payerMode === "single" ? "Several people paid" : "One person paid"}
               </button>
-            ) : null}
-          </div>
+            ) : null
+          }
+        >
           {form.payerMode === "single" ? (
             <div role="radiogroup" aria-labelledby={`${id}-paid-heading`} className="flex flex-wrap gap-2">
               {people.map((person) => (
@@ -468,7 +554,7 @@ export function ExpenseForm({
                   role="radio"
                   aria-checked={form.payer === person.id}
                   onClick={() => set("payer", person.id)}
-                  className={cn("inline-flex h-10 items-center gap-2 px-2.5", choice(form.payer === person.id))}
+                  className={cn("inline-flex h-11 items-center gap-2.5 px-3", choice(form.payer === person.id))}
                 >
                   <PersonAvatar person={person} size="xs" />
                   {person.id === viewer.id ? "You" : person.name}
@@ -476,52 +562,63 @@ export function ExpenseForm({
               ))}
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
+            <ul className="border-t border-border">
               {people.map((person) => (
-                <div key={person.id} className="flex items-center gap-3">
+                <li key={person.id} className="flex items-center gap-3 border-b border-border py-3">
                   <PersonAvatar person={person} size="sm" />
-                  <span className="min-w-0 flex-1 truncate text-sm">{nameOf(person.id)}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{nameOf(person.id)}</span>
                   <Input
                     inputMode="decimal"
                     placeholder="0"
                     aria-label={`${nameOf(person.id)} paid`}
                     value={form.payerAmounts[person.id] ?? ""}
                     onChange={(event) => set("payerAmounts", { ...form.payerAmounts, [person.id]: event.target.value })}
-                    className="w-32 text-right tabular-nums"
+                    className="h-10 w-32 text-right tabular-nums"
                   />
-                </div>
+                </li>
               ))}
-              {payerProblem ? <p className="text-sm text-danger">{payerProblem}</p> : null}
-            </div>
+              {payerProblem ? <li className="pt-3 text-sm text-danger">{payerProblem}</li> : null}
+            </ul>
           )}
-        </section>
+        </Step>
 
         {/* How to split */}
-        <section aria-labelledby={`${id}-split-heading`} className={cn(panel, "flex flex-col gap-3")}>
-          <h2 id={`${id}-split-heading`} className="text-sm font-semibold">
-            Split
-          </h2>
-          <ToggleGroup
-            type="single"
-            value={form.splitMethod}
-            onValueChange={(value) => value && set("splitMethod", value as SplitMethod)}
-            className="w-full"
+        <Step index={3 + offset} title="Split" titleId={`${id}-split-heading`}>
+          <div
+            role="radiogroup"
             aria-label="Split method"
+            className="grid grid-cols-4 divide-x divide-separator border border-separator"
           >
-            {SPLIT_OPTIONS.map((option) => (
-              <ToggleGroupItem key={option.value} value={option.value} className="flex-1">
-                {option.label}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+            {SPLIT_OPTIONS.map((option) => {
+              const selected = form.splitMethod === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => set("splitMethod", option.value)}
+                  className={cn(
+                    "h-11 text-sm transition-colors duration-200",
+                    focusRing,
+                    selected
+                      ? "bg-foreground font-medium text-background"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
 
-          <ul className="divide-y divide-border">
+          <ul className="mt-4 border-t border-border">
             {people.map((person) => {
               const share = preview.shares.get(person.id) ?? 0;
               const included = form.included.includes(person.id);
               const checkboxId = `${id}-include-${person.id}`;
               return (
-                <li key={person.id} className="flex min-h-12 items-center gap-3 py-2">
+                <li key={person.id} className="flex min-h-14 items-center gap-3 border-b border-border py-2.5">
                   {form.splitMethod === "equal" ? (
                     <Checkbox
                       id={checkboxId}
@@ -537,7 +634,10 @@ export function ExpenseForm({
                   <PersonAvatar person={person} size="sm" />
                   <label
                     htmlFor={form.splitMethod === "equal" ? checkboxId : `${id}-value-${person.id}`}
-                    className="min-w-0 flex-1 truncate text-sm"
+                    className={cn(
+                      "min-w-0 flex-1 truncate text-sm font-medium",
+                      form.splitMethod === "equal" && !included ? "text-muted-foreground" : "text-foreground",
+                    )}
                   >
                     {nameOf(person.id)}
                   </label>
@@ -549,16 +649,16 @@ export function ExpenseForm({
                         placeholder={form.splitMethod === "shares" ? "1" : "0"}
                         value={form.values[person.id] ?? ""}
                         onChange={(event) => set("values", { ...form.values, [person.id]: event.target.value })}
-                        className="w-20 text-right tabular-nums"
+                        className="h-10 w-20 text-right tabular-nums"
                       />
-                      <span className="w-10 text-xs text-muted-foreground">
+                      <span className="type-meta w-12 text-muted-foreground">
                         {form.splitMethod === "percent" ? "%" : form.splitMethod === "shares" ? "shares" : form.currency}
                       </span>
                     </span>
                   ) : null}
                   <span
                     className={cn(
-                      "w-20 text-right text-sm tabular-nums",
+                      "w-24 text-right text-[0.9375rem] tabular-nums",
                       share > 0 ? "font-medium text-foreground" : "text-muted-foreground",
                     )}
                     aria-label={`${nameOf(person.id)} share`}
@@ -570,7 +670,7 @@ export function ExpenseForm({
             })}
           </ul>
           {remaining && remaining.left !== 0 ? (
-            <p className="text-sm text-danger">
+            <p className="mt-3 text-sm text-danger">
               {remaining.unit === "money"
                 ? remaining.left > 0
                   ? `${format(remaining.left)} left to assign`
@@ -580,26 +680,27 @@ export function ExpenseForm({
                   : `${-remaining.left / 100}% too much`}
             </p>
           ) : null}
-        </section>
+        </Step>
       </div>
 
       {/* The summary and save: a rail on wide screens, a bar above the tabs on phones. */}
       <aside
         aria-label="Summary"
-        className="sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-20 -mx-4 flex flex-col gap-3 border-t border-separator bg-background/95 px-4 py-3 backdrop-blur-sm md:bottom-0 md:-mx-8 md:px-8 lg:top-8 lg:bottom-auto lg:mx-0 lg:gap-4 lg:border lg:border-border lg:bg-card lg:p-5 lg:backdrop-blur-none"
+        className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 -mx-4 flex flex-col gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 md:bottom-0 lg:top-24 lg:bottom-auto lg:col-span-4 lg:mx-0 lg:gap-5 lg:border-t lg:border-foreground lg:bg-transparent lg:px-0 lg:pt-4 lg:pb-0 lg:backdrop-blur-none"
       >
         <div className="hidden lg:block">
-          <p className="text-sm text-muted-foreground">Total</p>
-          <p className="mt-0.5 text-3xl font-extrabold tracking-tight tabular-nums">
-            {total > 0 ? format(total) : format(0)}
-          </p>
+          <p className="type-meta text-muted-foreground">Total</p>
+          <p className="mt-2 text-5xl font-medium tracking-[-0.045em] tabular-nums">{format(total > 0 ? total : 0)}</p>
         </div>
         {total > 0 && !problem ? (
-          <ul className="hidden flex-col gap-2 border-t border-border pt-3 lg:flex">
+          <ul className="hidden border-t border-border lg:block">
             {people
               .filter((person) => (preview.shares.get(person.id) ?? 0) > 0)
               .map((person) => (
-                <li key={person.id} className="flex items-center justify-between gap-3 text-sm">
+                <li
+                  key={person.id}
+                  className="flex items-center justify-between gap-3 border-b border-border py-2.5 text-sm"
+                >
                   <span className="truncate text-muted-foreground">{nameOf(person.id)}</span>
                   <span className="font-medium tabular-nums">{format(preview.shares.get(person.id) ?? 0)}</span>
                 </li>
@@ -608,12 +709,12 @@ export function ExpenseForm({
         ) : null}
         <div className="flex items-center justify-between gap-3 lg:block">{outcome}</div>
         {error ? (
-          <p role="alert" className="border border-danger/20 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
+          <p role="alert" className="border-l-2 border-danger bg-danger-soft px-3 py-2 text-sm text-danger-strong">
             {error}
           </p>
         ) : null}
         <div className="flex gap-2 lg:flex-col">
-          <Button type="submit" variant="brand" size="lg" disabled={pending} className="flex-1 lg:w-full lg:flex-none">
+          <Button type="submit" variant="brand" size="lg" disabled={pending} className="h-12 flex-1 lg:w-full lg:flex-none">
             {pending ? <Spinner size="sm" /> : null}
             {pending ? "Saving…" : editing ? "Save changes" : "Save expense"}
           </Button>
@@ -622,7 +723,7 @@ export function ExpenseForm({
             variant="ghost"
             size="lg"
             onClick={() => router.push(cancelHref)}
-            className="lg:w-full"
+            className="h-12 lg:w-full"
           >
             Cancel
           </Button>

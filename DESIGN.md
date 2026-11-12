@@ -1720,3 +1720,35 @@ Counts are from a token scan of `src/` (October 2026; about 17,700 `.tsx` files 
 | Overline | `text-[11px] font-semibold uppercase tracking-wider text-muted-foreground` |
 | Micro caps | `text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground` |
 | Motion | `transition-colors duration-200`; cards `transition-transform hover:-translate-y-1` |
+
+---
+
+## Appendix C. Aback Group Site Layer
+
+The sections above describe the Aback Tools app shell. `aback.group` is a
+company site, not a tool library, so it keeps the brand constants and
+replaces the app-shell composition with an editorial one. Where this
+appendix and an earlier section disagree, **this appendix wins for the
+Aback Group repository**.
+
+**Kept from the system**: Geist Sans and Geist Mono, square corners, 1px
+hairlines, the neutral ink action colour (`bg-primary`), the Aback Blue ramp,
+the focus ring, the theming mechanism, the status colour families.
+
+**Changed for the Group site**
+
+| Area | Rule |
+|---|---|
+| Voice of the page | Type leads and real product screenshots are the only imagery. No gradients, no illustrations, no shadows on cards, no icon chips, no pill badges, no mock window chrome. |
+| Brand blue | One blue does the work: the deep brand fill `primary-700` (3.3), with white text. It fills the homepage stage (`HeroShowcase`), the stage on a product page and the `brand` button, and marks the rule across a tile on hover, the numerals of the principles, the active nav item, link hover and text selection. The bright `primary-500` appears only in the logo and the small square of a section label; a large bright-blue panel was tried and rejected as too loud for the page. In dark mode small marks and the `brand` button step up to `primary-400`. One blue stage per page. |
+| Screenshots | Real captures of the live product's homepage, 1280px wide at 2x, cropped to remove third-party advertising, exported as 1600px WebP into `public/products/` and registered on the product (`screenshot` in `data/products.ts`). Shown only through `ProductShot`: a flat plate with a hairline edge and one light shadow. Only for products that are usable today. Capture again when the product's look changes. |
+| Scale | `type-display` (homepage H1 and 404), `type-title` (page H1), `type-headline` (section H2), `type-subhead` (statements, large list items), `type-lede` (intro paragraph), `type-meta` (mono, uppercase: indices, dates, domains, column heads). Display weights are 500, tracked tight. Defined in `app/globals.css`. |
+| Utility names | The scale uses the `type-` prefix, never `text-`. `tailwind-merge` reads an unknown `text-*` class as a colour and drops it when a real text colour follows. |
+| Page rhythm | Every section opens with a full-width hairline and uses `Section` (`components/section.tsx`): a label in a 3-column rail, content in the other 9. Sections alternate `default`, `surface` and, at most once per page, `inverse`. |
+| Lists | Products, posts, FAQs, links and facts are ruled rows (`ProductIndex`, `PostList`, `LinkList`), not cards. Numbering is two-digit mono (`01`). |
+| Product tiles | `ProductCard` is the one large panel. A product with a screenshot shows a closer crop of it on a neutral 16:9 stage (`bg-muted`). Tiles share hairlines (`gap-px`), never float with gaps. On the homepage a tile opens the product's site; in the directory (`linkTo="overview"`) it opens the product's page here. |
+| Status | A square mark plus a word, no box: filled for live, half for building, open for planned (`ProductStatus`). |
+| Buttons | One `brand` button per view (`Button variant="brand"`, `size="lg"`); everything else is an `ArrowLink`. `variant="inverse"` (white on ink) on the inverted band. The ink `default` stays for neutral actions. |
+| Inverted band | `bg-inverse` tokens. Used for Aback.ai on the homepage and for the footer. In dark mode it lifts to `#151515` instead of turning white. |
+| Motion | Arrow nudges, underline colour, the tile rule (`scale-x`), a 6px lift of a screenshot plate on hover. Nothing animates on load. |
+| Author credit | "By Devvrat Hans" comes from `siteConfig.author` and appears in the hero, the About page and the footer. |

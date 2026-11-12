@@ -1,9 +1,7 @@
-import { Button, EmptyState } from "@aback-ui/ui";
-import { IconHistory } from "@tabler/icons-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ActivityList } from "@/components/activity-list";
-import { PageTitle } from "@/components/page-title";
+import { ArrowLink } from "@/components/editorial";
+import { EmptyPanel, PageTitle } from "@/components/page-title";
 import { requireOnboardedViewer } from "@/server/auth/session";
 import { getDb } from "@/server/db/client";
 import { getFeed } from "@/server/queries";
@@ -28,26 +26,22 @@ export default async function ActivityPage({
   const last = feed.items.at(-1)?.activity;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-12 md:gap-16">
       <PageTitle
+        eyebrow="History"
         title="Activity"
         description="Everything that changed in your groups and hisabs. Private items are only shown to the two people involved."
       />
       {feed.items.length > 0 ? (
-        <>
+        <div className="flex flex-col gap-8">
           <ActivityList items={feed.items} people={feed.people} viewerId={viewer.id} />
           {feed.items.length === PAGE_SIZE && last ? (
-            <div>
-              <Button asChild variant="outline">
-                <Link href={`/activity?before=${last.createdAt.getTime()}&id=${last.id}`}>Show older activity</Link>
-              </Button>
-            </div>
+            <ArrowLink href={`/activity?before=${last.createdAt.getTime()}&id=${last.id}`}>Show older activity</ArrowLink>
           ) : null}
-        </>
+        </div>
       ) : (
-        <EmptyState
-          icon={<IconHistory aria-hidden="true" />}
-          title={before ? "No older activity" : "Nothing here yet"}
+        <EmptyPanel
+          title={before ? "No older activity." : "Nothing here yet."}
           description="When you or the people you share costs with add expenses or payments, they show up here."
         />
       )}

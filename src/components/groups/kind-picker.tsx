@@ -28,10 +28,10 @@ export function KindPicker({
             aria-checked={selected}
             onClick={() => onChange(kind)}
             className={cn(
-              "flex flex-col items-center gap-1.5 border px-2 py-3 text-xs font-medium transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              "flex flex-col items-center gap-2 border px-2 py-3.5 text-xs font-medium transition-colors duration-200 outline-none focus-visible:ring-2 focus-visible:ring-focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               selected
-                ? "border-primary-500 bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300"
-                : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
+                ? "border-foreground bg-foreground text-background"
+                : "border-separator bg-background text-muted-foreground hover:border-foreground hover:text-foreground",
             )}
           >
             <Icon aria-hidden="true" className="size-5" />

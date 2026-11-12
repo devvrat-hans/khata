@@ -39,8 +39,8 @@ export function InviteLink({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex gap-2">
-        <Input readOnly value={url} aria-label="Join link" className="font-mono text-xs" onFocus={(event) => event.currentTarget.select()} />
-        <CopyButton value={url} label="Copy link" showLabel variant="outline" />
+        <Input readOnly value={url} aria-label="Join link" className="h-11 font-mono text-xs" onFocus={(event) => event.currentTarget.select()} />
+        <CopyButton value={url} label="Copy link" showLabel variant="outline" className="h-11" />
       </div>
       <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm">
