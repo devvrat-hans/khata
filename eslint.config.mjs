@@ -14,6 +14,7 @@ export default defineConfig([
     "next-env.d.ts",
     "cloudflare-env.d.ts",
     "migrations/**",
+    "marketing/**",
   ]),
   {
     rules: {

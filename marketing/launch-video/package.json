@@ -1,0 +1,24 @@
+{
+  "name": "khata-launch-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Khata launch video, made with Remotion.",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "still": "remotion still src/index.ts",
+    "render": "remotion render src/index.ts KhataLaunch out/khata-launch.mp4 --codec=h264 --crf=16 --pixel-format=yuv420p",
+    "render:square": "remotion render src/index.ts KhataLaunchSquare out/khata-launch-square.mp4 --codec=h264 --crf=16 --pixel-format=yuv420p"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.543",
+    "@remotion/google-fonts": "^4.0.543",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "^4.0.543"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "typescript": "5.9.3"
+  }
+}

@@ -27,3 +27,7 @@ coverage/
 
 # local editor and agent tooling
 .claude/
+
+# launch video: dependencies, render cache and output
+marketing/*/node_modules/
+marketing/*/out/
