@@ -43,7 +43,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
                 </p>
               </div>
               <div className="lg:col-span-4 lg:col-start-9 lg:self-end">
-                <div className="border-t border-foreground pt-6">
+                <div>
                   <JoinButton code={code} />
                 </div>
               </div>

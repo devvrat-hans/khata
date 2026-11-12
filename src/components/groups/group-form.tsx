@@ -72,7 +72,7 @@ export function GroupForm({ contacts, defaultCurrency }: { contacts: ContactOpti
           onChange={(event) => setName(event.target.value)}
           autoFocus
           required
-          className="h-auto border-0 border-b border-separator bg-transparent px-0 py-2 text-3xl font-medium tracking-[-0.03em] shadow-none transition-colors duration-200 placeholder:font-normal focus-visible:border-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="h-auto border-0 border-b border-separator bg-transparent px-0 dark:bg-transparent py-2 text-3xl font-medium tracking-[-0.03em] shadow-none transition-colors duration-200 placeholder:font-normal focus-visible:border-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
         />
       </div>
       <div className="flex flex-col gap-3">

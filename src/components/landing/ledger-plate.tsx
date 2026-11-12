@@ -85,7 +85,7 @@ export function LedgerPlate() {
         {/* Ledger and balances */}
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-10">
           <div>
-            <p className="flex items-baseline gap-2 border-t border-foreground pt-2 pb-3 text-sm font-medium">
+            <p className="flex items-baseline gap-2 pb-3 text-sm font-medium">
               Expenses <span className="type-meta text-muted-foreground">05</span>
             </p>
             <ul className="border-t border-border">
@@ -114,7 +114,7 @@ export function LedgerPlate() {
           </div>
           <div className="hidden flex-col gap-6 lg:flex">
             <div>
-              <p className="flex items-baseline gap-2 border-t border-foreground pt-2 pb-3 text-sm font-medium">
+              <p className="flex items-baseline gap-2 pb-3 text-sm font-medium">
                 Who owes whom <span className="type-meta text-muted-foreground">02</span>
               </p>
               <ul className="border-t border-border text-[0.8125rem]">
@@ -139,7 +139,7 @@ export function LedgerPlate() {
               </ul>
             </div>
             <div>
-              <p className="flex items-center gap-2 border-t border-foreground pt-2 pb-3 text-sm font-medium">
+              <p className="flex items-center gap-2 pb-3 text-sm font-medium">
                 <IconLock className="size-3.5 text-primary-700 dark:text-primary-400" />
                 Private hisabs
               </p>

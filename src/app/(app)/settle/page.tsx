@@ -63,7 +63,7 @@ export default async function SettlePage({
           title="Record a payment"
           description="Pay back what you owe, or record money you received."
         />
-        <div className="max-w-2xl border-t border-foreground pt-8">
+        <div className="max-w-2xl">
           <SettleForm
             viewer={asPerson(viewer)}
             context={{
@@ -112,7 +112,7 @@ export default async function SettlePage({
           title="Record a payment"
           description="This settles your one to one hisab. To settle a balance from a group, record it in that group."
         />
-        <div className="max-w-2xl border-t border-foreground pt-8">
+        <div className="max-w-2xl">
           <SettleForm
             viewer={asPerson(viewer)}
             context={{

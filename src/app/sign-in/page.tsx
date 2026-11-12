@@ -56,7 +56,7 @@ export default async function SignInPage({
           </div>
 
           <div className="lg:col-span-5 lg:col-start-8">
-            <section aria-labelledby="form-heading" className="border-t border-foreground pt-5">
+            <section aria-labelledby="form-heading">
               <h2 id="form-heading" className="text-lg font-medium tracking-[-0.02em]">
                 Sign in or create an account
               </h2>

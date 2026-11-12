@@ -114,7 +114,7 @@ Rules:
 ## 9. Design and copy
 
 - Follow `DESIGN.md`. In short: square corners everywhere, neutral surfaces, Aback Blue (`primary-*` ramp) only as a signal, Geist, Tabler icons only, every light colour paired with its dark value, visible focus rings.
-- Khata uses the editorial layer of aback.group (`DESIGN.md`, Appendix C), adapted for an app: type leads, lists are ruled rows rather than cards, sections open with a rule, and the deep brand blue (`primary-700`, `primary-400` in dark) is the one signal. No gradients, washes, icon chips, pill badges or card shadows.
+- Khata uses the editorial layer of aback.group (`DESIGN.md`, Appendix C), adapted for an app: type leads, lists are ruled rows rather than cards, sections are set apart by space (no heavy rule above a heading), and the deep brand blue (`primary-700`, `primary-400` in dark) is the one signal. No gradients, washes, icon chips, pill badges or card shadows.
 - Build pages from the shared primitives, not new markup: `PageTitle`, `SectionTitle`, `RailSection`, `EmptyPanel` (`components/page-title.tsx`), `SectionLabel`, `ArrowLink`, `StatusMark`, `Index`, `Band` (`components/editorial.tsx`) and `StatStrip` (`components/stats.tsx`). The type scale (`type-display`, `type-title`, `type-page`, `type-headline`, `type-subhead`, `type-lede`, `type-figure`, `type-stat`, `type-meta`) and the `container-site`, `container-app`, `link-inline` and `row-link` utilities live in `src/app/globals.css`.
 - One brand button per view. Everything else is an `ArrowLink`, an outline button or a ghost button. Selected chips are ink (`bg-foreground text-background`), not blue.
 - Use `@aback-ui/ui` components before writing markup.

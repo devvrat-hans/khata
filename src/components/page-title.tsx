@@ -44,8 +44,8 @@ export function PageTitle({
 }
 
 /**
- * A section head: an ink rule, the heading, an optional count in mono, and
- * one action on the right. Lists under it are ruled rows.
+ * A section head: the heading, an optional count in mono, and one action on
+ * the right. Lists under it are ruled rows.
  */
 export function SectionTitle({
   title,
@@ -61,7 +61,7 @@ export function SectionTitle({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-center justify-between gap-4 border-t border-foreground pt-3 pb-4", className)}>
+    <div className={cn("flex items-center justify-between gap-4 pb-4", className)}>
       <h2 id={id} className="flex items-baseline gap-2.5 text-lg font-medium tracking-[-0.02em] text-foreground">
         {title}
         {count !== undefined ? (
@@ -110,7 +110,7 @@ export function EmptyPanel({
 
 /**
  * The label rail from aback.group: a heading and a short description on the
- * left, the content on the right, opened by an ink rule. Settings use it.
+ * left, the content on the right. Settings use it.
  */
 export function RailSection({
   id,
@@ -131,8 +131,7 @@ export function RailSection({
       id={id}
       aria-labelledby={headingId}
       className={cn(
-        "grid scroll-mt-24 grid-cols-1 gap-6 border-t pt-5 lg:grid-cols-12 lg:gap-12",
-        tone === "danger" ? "border-danger" : "border-foreground",
+        "grid scroll-mt-24 grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-12",
       )}
     >
       <div className="lg:col-span-4">

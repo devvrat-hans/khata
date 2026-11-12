@@ -31,6 +31,12 @@
   // host (khata.aback.group), which does not match APP_URL in .dev.vars.
   "dev": { "host": "localhost:3000", "port": 3000 },
 
+  // Run the Worker next to the database. D1's primary is in Singapore (APAC),
+  // and a signed-in page makes several queries one after another, so running
+  // near the visitor instead would pay a long round trip for every query.
+  // Static files are still served from the location nearest the visitor.
+  "placement": { "mode": "targeted", "region": "aws:ap-southeast-1" },
+
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "khata" }],
 
   // The application database. The schema lives in src/server/db/schema.ts and

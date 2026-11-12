@@ -118,7 +118,7 @@ export function SettleForm({
             onChange={(event) => setAmount(event.target.value)}
             required
             autoFocus={!initial.amount}
-            className="h-auto min-w-0 flex-1 border-0 border-b border-separator bg-transparent px-0 py-1 text-5xl font-medium tracking-[-0.045em] tabular-nums shadow-none transition-colors duration-200 focus-visible:border-foreground focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-6xl"
+            className="h-auto min-w-0 flex-1 border-0 border-b border-separator bg-transparent px-0 dark:bg-transparent py-1 text-5xl font-medium tracking-[-0.045em] tabular-nums shadow-none transition-colors duration-200 focus-visible:border-foreground focus-visible:ring-0 focus-visible:ring-offset-0 sm:text-6xl"
           />
           <div className="w-24 shrink-0 pb-1">
             <CurrencySelect

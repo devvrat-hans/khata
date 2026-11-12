@@ -31,7 +31,7 @@ export default async function WelcomePage({
             </p>
           </div>
           <div className="lg:col-span-6 lg:col-start-7">
-            <div className="border-t border-foreground pt-8">
+            <div>
               <ProfileForm
                 mode="welcome"
                 redirectTo={next}

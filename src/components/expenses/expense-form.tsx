@@ -80,9 +80,9 @@ const choice = (selected: boolean) =>
   );
 /** A large field set on a single hairline, for the two things every expense needs. */
 const bareInput =
-  "h-auto border-0 border-b border-separator bg-transparent px-0 shadow-none transition-colors duration-200 focus-visible:border-foreground focus-visible:ring-0 focus-visible:ring-offset-0";
+  "h-auto border-0 border-b border-separator bg-transparent px-0 shadow-none dark:bg-transparent transition-colors duration-200 focus-visible:border-foreground focus-visible:ring-0 focus-visible:ring-offset-0";
 
-/** A numbered step of the form, opened by an ink rule like every section head. */
+/** A numbered step of the form, with a mono index before its heading. */
 function Step({
   index,
   title,
@@ -99,7 +99,7 @@ function Step({
   className?: string;
 }) {
   return (
-    <section aria-labelledby={titleId} className={cn("border-t border-foreground pt-4", className)}>
+    <section aria-labelledby={titleId} className={className}>
       <div className="mb-6 flex items-center justify-between gap-4">
         <h2 id={titleId} className="flex items-baseline gap-3 text-lg font-medium tracking-[-0.02em]">
           <span aria-hidden="true" className="type-meta text-muted-foreground">
@@ -686,7 +686,7 @@ export function ExpenseForm({
       {/* The summary and save: a rail on wide screens, a bar above the tabs on phones. */}
       <aside
         aria-label="Summary"
-        className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 -mx-4 flex flex-col gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 md:bottom-0 lg:top-24 lg:bottom-auto lg:col-span-4 lg:mx-0 lg:gap-5 lg:border-t lg:border-foreground lg:bg-transparent lg:px-0 lg:pt-4 lg:pb-0 lg:backdrop-blur-none"
+        className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 -mx-4 flex flex-col gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 md:bottom-0 lg:top-24 lg:bottom-auto lg:col-span-4 lg:mx-0 lg:gap-5 lg:border-t-0 lg:bg-transparent lg:px-0 lg:pt-0 lg:pb-0 lg:backdrop-blur-none"
       >
         <div className="hidden lg:block">
           <p className="type-meta text-muted-foreground">Total</p>
